@@ -49,6 +49,9 @@ class WaypointAlgorithm(Node):
             10)
         self.airmar_data_subscription
 
+    def listener_callback(self, msg):
+	self.getlogger().info('I heard "%s"' % msg.data)
+
     #helper function to convert an array of coordinate objects
     def createPolygonArray(arr):
         newArr = []
@@ -56,6 +59,19 @@ class WaypointAlgorithm(Node):
             newArr.append((coord.lat, coord.lng))
         return newArr
         
+
+    def main(args=None):
+	rclpy.init(args=args)
+
+	waypoint_alg = WaypointAlgorithm()
+
+	rclpy.spin(waypoint_alg)
+
+	waypoint_alg.destory_node()
+	rclpy.shutdown()
+
+    if __name__ == '__main__':
+	main()
 
     #take user input for defining the bounary polygon that the robot will stay within 
     val = input("How many verticies will the bounding box contain? ")
