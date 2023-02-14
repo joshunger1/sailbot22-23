@@ -13,6 +13,8 @@ import numpy as np
 import matplotlib as plt
 from turfpy.measurement import boolean_point_in_polygon
 from geojson import Point, Polygon, Feature
+from rclpy.node import Node
+from std_msgs.msg import String, Float32, Int8, Int16
 
 
 
@@ -34,48 +36,61 @@ class Coordinate():
 """
 Main Algorithm
 """
-#helper function to convert an array of coordinate objects
-def createPolygonArray(arr):
-    newArr = []
-    for coord in arr:
-        newArr.append((coord.lat, coord.lng))
-    return newArr
-    
+class WaypointAlgorithm(Node):
 
-#take user input for defining the bounary polygon that the robot will stay within 
-val = input("How many verticies will the bounding box contain? ")
-boundingBoxCoordinates = []
+    def __init__(self):
+        super().__init__('control_system')
 
-#for the amount of verticies that make up the polygon, take user input for the latitude and longitude for it
-for x in range(int(val)):
-    newCoordLat = input("Latitude:")
-    newCoordLng = input("Longitude:")
-    waypointNum = x+1
-    waypointFinal = Coordinate(newCoordLat, newCoordLng)
-    boundingBoxCoordinates.append(waypointFinal)
-    print("Created waypoint number " + str(waypointNum) + " with latitude of " + str(newCoordLat) + " and longitude of " + str(newCoordLng) + ".")
+        # Create subscription to airmar_data
+        self.airmar_data_subscription = self.create_subscription(
+            String,
+            'airmar_data',
+            self.airmar_data_listener_callback,
+            10)
+        self.airmar_data_subscription
 
-#convert coordinates to a tuple so we can build the polygon
-tupleCoordinateArr = []
-for coord in boundingBoxCoordinates:
-    coordtuple = tuple([float(coord.lat), float(coord.lng)])
-    tupleCoordinateArr.append(coordtuple)
+    #helper function to convert an array of coordinate objects
+    def createPolygonArray(arr):
+        newArr = []
+        for coord in arr:
+            newArr.append((coord.lat, coord.lng))
+        return newArr
+        
 
-#collect information for the desired waypoint that the robot will sail to
-print(tupleCoordinateArr)
-desiredLat = input("Latitude:")
-desiredLng = input("Longitude:")
-desiredWaypoint = Coordinate(newCoordLat, newCoordLng)
+    #take user input for defining the bounary polygon that the robot will stay within 
+    val = input("How many verticies will the bounding box contain? ")
+    boundingBoxCoordinates = []
 
-#generate the polygon feature with the desired waypoint
-point = Feature(geometry=Point((float(desiredWaypoint.lat), float(desiredWaypoint.lng))))
+    #for the amount of verticies that make up the polygon, take user input for the latitude and longitude for it
+    for x in range(int(val)):
+        newCoordLat = input("Latitude:")
+        newCoordLng = input("Longitude:")
+        waypointNum = x+1
+        waypointFinal = Coordinate(newCoordLat, newCoordLng)
+        boundingBoxCoordinates.append(waypointFinal)
+        print("Created waypoint number " + str(waypointNum) + " with latitude of " + str(newCoordLat) + " and longitude of " + str(newCoordLng) + ".")
 
-polygon = Polygon(
-    [
-        tupleCoordinateArr
-    ]
-)
+    #convert coordinates to a tuple so we can build the polygon
+    tupleCoordinateArr = []
+    for coord in boundingBoxCoordinates:
+        coordtuple = tuple([float(coord.lat), float(coord.lng)])
+        tupleCoordinateArr.append(coordtuple)
 
-#check if the desired waypoint is within the polygon
-isWithin = boolean_point_in_polygon(point, polygon)
-print(isWithin)
+    #collect information for the desired waypoint that the robot will sail to
+    print(tupleCoordinateArr)
+    desiredLat = input("Latitude:")
+    desiredLng = input("Longitude:")
+    desiredWaypoint = Coordinate(newCoordLat, newCoordLng)
+
+    #generate the polygon feature with the desired waypoint
+    point = Feature(geometry=Point((float(desiredWaypoint.lat), float(desiredWaypoint.lng))))
+
+    polygon = Polygon(
+        [
+            tupleCoordinateArr
+        ]
+    )
+
+    #check if the desired waypoint is within the polygon
+    isWithin = boolean_point_in_polygon(point, polygon)
+    print(isWithin)
