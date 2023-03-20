@@ -4,6 +4,8 @@ from rclpy.node import Node
 import json
 from std_msgs.msg import String, Float32, Int8, Int16
 import sailbot.autonomous.p2p as p2p
+import sailbot.autonomous.waypoint as waypoint
+import sailbot.autonomous.destinationCapture as destination
 from collections import deque
 
 
@@ -53,6 +55,10 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         # Create instance var for keeping queue of wind data
         self.lastWinds = []
         self.p2p_alg = None
+
+        # Create instance var for determining destination
+        self.hasBoundingBox = False
+        self.hasWaypoints = False
 
         # Create instance var for keeping queue of roll data
         self.omega = deque(maxlen=4)
@@ -220,7 +226,10 @@ def main(args=None):
             rudder_json = {"channel": "8", "angle": rudder_angle}
             control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
         elif float(control_system.serial_rc["state2"]) < 600:
-            destinations = [(42.277055,-71.799924),(42.276692,-71.799912)] 
+            if not control_system.hasBoundingBox:
+                # swap out hardcoded destinations with the destination capture file
+                # destination.desinationFinder
+            destinations = [(42.277055,-71.799924),(42.276692,-71.799912)]
             if 'Latitude' in control_system.airmar_data and 'Longitude' in control_system.airmar_data:
                 try:
                     if control_system.p2p_alg is None:  # Instantiate new

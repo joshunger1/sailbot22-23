@@ -2,25 +2,10 @@
 This file will be used for all the high level waypoint algorithms
 If you have any questions about the code please reach out to:
 Joshua Unger
-OR
-Owen Pfannenstiehl
-OR
-Douglas Moore
 """
 
-"""
-Imports
-"""
 from turfpy.measurement import boolean_point_in_polygon
 from geojson import Point, Polygon, Feature
-from rclpy.node import Node
-from std_msgs.msg import String, Float32, Int8, Int16
-
-
-"""
-SubClasses
-"""
-
 
 ###########
 # Coordinate Class
@@ -34,23 +19,7 @@ class Coordinate():
         self.lng = lng
 
 
-"""
-Main Algorithm
-"""
-
-
-class WaypointAlgorithm(Node):
-
-    # def __init__(self):
-    #     super().__init__('control_system')
-    #
-    #     # Create subscription to airmar_data
-    #     self.airmar_data_subscription = self.create_subscription(
-    #         String,
-    #         'airmar_data',
-    #         self.airmar_data_listener_callback,
-    #         10)
-    #     self.airmar_data_subscription
+class destinationFinder():
 
     # helper function to convert an array of coordinate objects
     def createPolygonArray(arr):

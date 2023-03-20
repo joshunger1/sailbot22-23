@@ -258,17 +258,8 @@ def runSimulation():
 
 
 
-goal = np.array([60, 60])
-runSimulation()
-goal = np.array([60, -60])
-runSimulation()
-goal = np.array([-60, -60])
-runSimulation()
 goal = np.array([-60, 60])
 runSimulation()
-goal = np.array([0,0])
-runSimulation()
-
 
 
 
