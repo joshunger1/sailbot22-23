@@ -220,6 +220,7 @@ def main(args=None):
             rudder_json = {"channel": "8", "angle": rudder_angle}
             control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
         elif float(control_system.serial_rc["state2"]) < 600:
+            control_system.get_logger().info("Currently in AUTONOMOUS")
             rudder_angle = (float(control_system.serial_rc["rudder"]) / 2000 * 90) + 25
             rudder_json = {"channel": "8", "angle": rudder_angle}
             control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
