@@ -5,6 +5,7 @@ import json
 from std_msgs.msg import String, Float32, Int8, Int16
 import sailbot.autonomous.p2p as p2p
 from collections import deque
+import time
 
 
 class ControlSystem(Node):  # Gathers data from some nodes and distributes it to others
@@ -227,11 +228,13 @@ def main(args=None):
 
             # MIN AND MAX FOR RUDDER IS 106.495 AND 32.92
 
+            start_time = time.time()  # Get the current time
+            while time.time() - start_time < 10:  # Keep looping until 10 seconds have passed
+                for i in range(int(106.495 * 100), int(32.92 * 100) - 1, -1):
+                    num = i / 100
+                    rudder_json = {"channel": "8", "angle": float(num)}
+                    control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
 
-
-            rudder_angle = (float(control_system.serial_rc["rudder"]) / 2000 * 90) + 25
-            rudder_json = {"channel": "8", "angle": rudder_angle}
-            control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
             # destinations = [(42.277055,-71.799924),(42.276692,-71.799912)]
             # if 'Latitude' in control_system.airmar_data and 'Longitude' in control_system.airmar_data:
             #     try:
