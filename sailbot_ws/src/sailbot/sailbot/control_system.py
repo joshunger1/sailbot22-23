@@ -189,6 +189,8 @@ def main(args=None):
         if len(control_system.serial_rc) < 2:
             pass # Don't have rc values
         elif float(control_system.serial_rc["state2"]) > 600:  # in RC
+            control_system.get_logger().info("Currently in RC")
+
             if float(control_system.serial_rc["state1"]) < 400:
                 # Manual
                 manual_angle = int((float(control_system.serial_rc["manual"]) / 2000) * 100) + 65
@@ -219,8 +221,14 @@ def main(args=None):
             rudder_angle = (float(control_system.serial_rc["rudder"]) / 2000 * 90) + 25
             rudder_json = {"channel": "8", "angle": rudder_angle}
             control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
+
         elif float(control_system.serial_rc["state2"]) < 600:
             control_system.get_logger().info("Currently in AUTONOMOUS")
+
+            # MIN AND MAX FOR RUDDER IS 106.495 AND 32.92
+
+
+
             rudder_angle = (float(control_system.serial_rc["rudder"]) / 2000 * 90) + 25
             rudder_json = {"channel": "8", "angle": rudder_angle}
             control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
