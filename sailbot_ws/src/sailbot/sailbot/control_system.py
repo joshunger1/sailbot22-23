@@ -226,37 +226,42 @@ def main(args=None):
         elif float(control_system.serial_rc["state2"]) < 600:
             control_system.get_logger().error("Currently in AUTONOMOUS")
 
-            start_time = time.time()  # Get the current time
-            while time.time() - start_time < 40:  # Run the loop for 40 seconds
-                current_time = time.time()  # Get the current time in each iteration
-                switch_case = int(current_time - start_time) % 4  # Determine which switch case to execute
+            # Attempting to read airmar data
+            control_system.get_logger().error(control_system.airmar_data)
 
-                # Execute the switch case
-                if switch_case == 0:
-                    control_system.get_logger().error("max lift port")
-                    # begin max lift port
-                    state_msg.data = 0
-                    control_system.trim_tab_control_publisher_.publish(state_msg)
-                elif switch_case == 1:
-                    control_system.get_logger().error("max lift starboard")
-                    # begin max lift starboard
-                    state_msg.data = 1
-                    control_system.trim_tab_control_publisher_.publish(state_msg)
-                elif switch_case == 2:
-                    control_system.get_logger().error("max drag port")
-                    # begin max drag port
-                    state_msg.data = 2
-                    control_system.trim_tab_control_publisher_.publish(state_msg)
-                else:
-                    control_system.get_logger().error("max drag starboard")
-                    # begin max drag starboard
-                    state_msg.data = 3
-                    control_system.trim_tab_control_publisher_.publish(state_msg)
+            # TESTING TRIM TAB
 
-                # Wait for the remaining time to ensure that each switch case runs for 10 seconds
-                remaining_time = 10 - (time.time() - current_time)
-                if remaining_time > 0:
-                    time.sleep(remaining_time)
+            # start_time = time.time()  # Get the current time
+            # while time.time() - start_time < 40:  # Run the loop for 40 seconds
+            #     current_time = time.time()  # Get the current time in each iteration
+            #     switch_case = int(current_time - start_time) % 4  # Determine which switch case to execute
+            #
+            #     # Execute the switch case
+            #     if switch_case == 0:
+            #         control_system.get_logger().error("max lift port")
+            #         # begin max lift port
+            #         state_msg.data = 0
+            #         control_system.trim_tab_control_publisher_.publish(state_msg)
+            #     elif switch_case == 1:
+            #         control_system.get_logger().error("max lift starboard")
+            #         # begin max lift starboard
+            #         state_msg.data = 1
+            #         control_system.trim_tab_control_publisher_.publish(state_msg)
+            #     elif switch_case == 2:
+            #         control_system.get_logger().error("max drag port")
+            #         # begin max drag port
+            #         state_msg.data = 2
+            #         control_system.trim_tab_control_publisher_.publish(state_msg)
+            #     else:
+            #         control_system.get_logger().error("max drag starboard")
+            #         # begin max drag starboard
+            #         state_msg.data = 3
+            #         control_system.trim_tab_control_publisher_.publish(state_msg)
+            #
+            #     # Wait for the remaining time to ensure that each switch case runs for 10 seconds
+            #     remaining_time = 10 - (time.time() - current_time)
+            #     if remaining_time > 0:
+            #         time.sleep(remaining_time)
 
 
 
