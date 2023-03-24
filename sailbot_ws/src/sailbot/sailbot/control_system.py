@@ -234,6 +234,10 @@ def main(args=None):
             control_system.get_logger().error("Track Degrees Magnetic: " + control_system.airmar_data["track-degrees-magnetic"])
             control_system.get_logger().error("Pitch: " + control_system.airmar_data["pitchroll"]["pitch"])
             control_system.get_logger().error("Roll: " + control_system.airmar_data["pitchroll"]["roll"])
+            control_system.get_logger().error("Lat: " + control_system.airmar_data["Latitude"])
+            control_system.get_logger().error("Lat-Dir: " + control_system.airmar_data["Latitude-direction"])
+            control_system.get_logger().error("Long: " + control_system.airmar_data["Longitude"])
+            control_system.get_logger().error("Long-Dir: " + control_system.airmar_data["Longitude-direction"])
 
             # TESTING TRIM TAB
 
