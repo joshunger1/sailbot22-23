@@ -225,7 +225,6 @@ def main(args=None):
 
         elif float(control_system.serial_rc["state2"]) < 600:
             control_system.get_logger().error("Currently in AUTONOMOUS")
-            control_system.get_logger().error()
 
             start_time = time.time()  # Get the current time
             while time.time() - start_time < 40:  # Run the loop for 40 seconds
