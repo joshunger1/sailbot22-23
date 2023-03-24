@@ -227,7 +227,13 @@ def main(args=None):
             control_system.get_logger().error("Currently in AUTONOMOUS")
 
             # Attempting to read airmar data
-            control_system.get_logger().error(control_system.airmar_data["currentHeading"])
+            control_system.get_logger().error("Current Heading: " + control_system.airmar_data["currentHeading"])
+            control_system.get_logger().error("Magnetic Deviation: " + control_system.airmar_data["magnetic-deviation"])
+            control_system.get_logger().error("Magnetic Variation: " + control_system.airmar_data["magnetic-variation"])
+            control_system.get_logger().error("Track Degrees True: " + control_system.airmar_data["track-degrees-true"])
+            control_system.get_logger().error("Track Degrees Magnetic: " + control_system.airmar_data["track-degrees-magnetic"])
+            control_system.get_logger().error("Pitch: " + control_system.airmar_data["pitchroll"]["pitch"])
+            control_system.get_logger().error("Roll: " + control_system.airmar_data["pitchroll"]["roll"])
 
             # TESTING TRIM TAB
 
