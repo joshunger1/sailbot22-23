@@ -224,16 +224,51 @@ def main(args=None):
             control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
 
         elif float(control_system.serial_rc["state2"]) < 600:
-            control_system.get_logger().info("Currently in AUTONOMOUS")
+            control_system.get_logger().error("Currently in AUTONOMOUS")
+            control_system.get_logger().error()
+
+            start_time = time.time()  # Get the current time
+            while time.time() - start_time < 40:  # Run the loop for 40 seconds
+                current_time = time.time()  # Get the current time in each iteration
+                switch_case = int(current_time - start_time) % 4  # Determine which switch case to execute
+
+                # Execute the switch case
+                if switch_case == 0:
+                    control_system.get_logger().error("max lift port")
+                    # begin max lift port
+                    state_msg.data = 0
+                    control_system.trim_tab_control_publisher_.publish(state_msg)
+                elif switch_case == 1:
+                    control_system.get_logger().error("max lift starboard")
+                    # begin max lift starboard
+                    state_msg.data = 1
+                    control_system.trim_tab_control_publisher_.publish(state_msg)
+                elif switch_case == 2:
+                    control_system.get_logger().error("max drag port")
+                    # begin max drag port
+                    state_msg.data = 2
+                    control_system.trim_tab_control_publisher_.publish(state_msg)
+                else:
+                    control_system.get_logger().error("max drag starboard")
+                    # begin max drag starboard
+                    state_msg.data = 3
+                    control_system.trim_tab_control_publisher_.publish(state_msg)
+
+                # Wait for the remaining time to ensure that each switch case runs for 10 seconds
+                remaining_time = 10 - (time.time() - current_time)
+                if remaining_time > 0:
+                    time.sleep(remaining_time)
+
+
 
             # MIN AND MAX FOR RUDDER IS 106.495 AND 32.92
 
-            start_time = time.time()  # Get the current time
-            while time.time() - start_time < 10:  # Keep looping until 10 seconds have passed
-                for i in range(int(106.495 * 100), int(32.92 * 100) - 1, -1):
-                    num = i / 100
-                    rudder_json = {"channel": "8", "angle": float(num)}
-                    control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
+            # start_time = time.time()  # Get the current time
+            # while time.time() - start_time < 10:  # Keep looping until 10 seconds have passed
+            #     for i in range(int(106.495 * 100), int(32.92 * 100) - 1, -1):
+            #         num = i / 100
+            #         rudder_json = {"channel": "8", "angle": float(num)}
+            #         control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
 
             # destinations = [(42.277055,-71.799924),(42.276692,-71.799912)]
             # if 'Latitude' in control_system.airmar_data and 'Longitude' in control_system.airmar_data:
