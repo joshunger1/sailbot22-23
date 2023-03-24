@@ -227,7 +227,7 @@ def main(args=None):
             control_system.get_logger().error("Currently in AUTONOMOUS")
 
             # Attempting to read airmar data
-            control_system.get_logger().error(control_system.airmar_data)
+            control_system.get_logger().error(control_system.airmar_data_subscription)
 
             # TESTING TRIM TAB
 
