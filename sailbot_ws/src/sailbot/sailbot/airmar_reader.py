@@ -35,7 +35,6 @@ class AirmarReader(Node): #translates airmar data into json and publishes on 'ai
             if(type_code == 'ROT'): #rate of turn degrees per minute. negative is to port
                 return {"rate-of-turn":args[1]}
             elif(type_code == 'GLL'):
-                self.get_logger().info("got lat log data")
                 #convert from degree decimal minutes to decimal degrees
                 #dd = d + m/60
                 #lat = math.floor(float(args[1]) / 100) + (float(args[1]) % 100)/60.0

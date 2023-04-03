@@ -167,6 +167,8 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         ballast_json = {"channel": "12", "angle": ballast_angle}
         self.pwm_control_publisher_.publish(self.make_json_string(ballast_json))
 
+    #def headingMovingAverage(self, ):
+
            
 def main(args=None):
     rclpy.init(args=args)
@@ -235,9 +237,11 @@ def main(args=None):
             control_system.get_logger().error("Pitch: " + control_system.airmar_data["pitchroll"]["pitch"])
             control_system.get_logger().error("Roll: " + control_system.airmar_data["pitchroll"]["roll"])
             # control_system.get_logger().error("Lat: " + control_system.airmar_data["Latitude"])
-            control_system.get_logger().error("Lat-Dir: " + control_system.airmar_data["Latitude-direction"])
+            # control_system.get_logger().error("Lat-Dir: " + control_system.airmar_data["Latitude-direction"])
             # control_system.get_logger().error("Long: " + control_system.airmar_data["Longitude"])
-            control_system.get_logger().error("Long-Dir: " + control_system.airmar_data["Longitude-direction"])
+            # control_system.get_logger().error("Long-Dir: " + control_system.airmar_data["Longitude-direction"])
+            control_system.get_logger().error("Apparent Wind Speed: " + control_system.airmar_data["apparentWind"]["speed"])
+            control_system.get_logger().error("Apparent Wind Direction: " + control_system.airmar_data["apparentWind"]["direction"])
 
             # TESTING TRIM TAB
 
