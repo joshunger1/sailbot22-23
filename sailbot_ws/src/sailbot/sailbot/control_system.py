@@ -350,10 +350,10 @@ def main(args=None):
             else:
                 control_system.get_logger().info("No wind angle values")
 
-            if control_system.airmar_data["Latitude"] or control_system.airmar_data["Longitude"]:
-                control_system.boat = np.array([control_system.airmar_data["Latitude"], control_system.airmar_data["Longitude"]])
-            else:
-                control_system.get_logger().error("No GPS Data")
+            # if control_system.airmar_data["Latitude"] or control_system.airmar_data["Longitude"]:
+            #     control_system.boat = np.array([control_system.airmar_data["Latitude"], control_system.airmar_data["Longitude"]])
+            # else:
+            #     control_system.get_logger().error("No GPS Data")
 
             curr_wind_value = control_system.update_winds(control_system.airmar_data["apparentWind"]["direction"])
             curr_heading_value = control_system.airmar_data["currentHeading"]
