@@ -361,8 +361,8 @@ def main(args=None):
             wind_cos = math.cos(-true_wind_value)
             wind_sin = math.sin(-true_wind_value)
 
-            control_system.get_logger().error(wind_sin)
-            control_system.get_logger().error(wind_cos)
+            control_system.get_logger().error(str(wind_sin))
+            control_system.get_logger().error(str(wind_cos))
 
 
             # # Attempting to read airmar data
