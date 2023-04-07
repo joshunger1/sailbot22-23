@@ -72,7 +72,7 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
 
         # autonomous global variables, position and velocity of objects
         self.boat = np.array([0, 0])  # boat position
-        self.wind = np.array([-1.7, -1])  # wind in x and y velocity (m/s)
+        self.wind = np.array([0, 0])  # wind in x and y velocity (m/s)
         self.windDir = self.wind / np.linalg.norm(self.wind)  # normalize the wind vector
 
         # need to feed new values
@@ -361,10 +361,7 @@ def main(args=None):
             wind_cos = math.cos(-true_wind_value)
             wind_sin = math.sin(-true_wind_value)
 
-
-
-            control_system.get_logger().error("sin " + str(wind_sin))
-            control_system.get_logger().error("cos " + str(wind_cos))
+            control_system.wind = np.array([wind_sin, wind_cos])
 
 
             # # Attempting to read airmar data
