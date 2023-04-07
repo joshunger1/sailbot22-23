@@ -356,7 +356,7 @@ def main(args=None):
             #     control_system.get_logger().error("No GPS Data")
 
             curr_wind_value = control_system.update_winds(control_system.airmar_data["apparentWind"]["direction"])
-            curr_heading_value = control_system.airmar_data["currentHeading"]
+            curr_heading_value = float(control_system.airmar_data["currentHeading"])
             true_wind_value = (curr_wind_value + curr_heading_value) % 360
             wind_cos = math.cos(-true_wind_value)
             wind_sin = math.sin(-true_wind_value)
