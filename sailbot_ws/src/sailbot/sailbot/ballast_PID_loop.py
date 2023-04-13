@@ -20,7 +20,7 @@ def checkDesiredRoll():
     # delta = self.airmar_data["roll"] - self.lastRollAngle[-1]
 
 def ballast_alg_passive(): # this alg tells the ballast to go hard port or hard starboard depending on the tack
-    # NOTE: max port ADC value for ballast is 0.16; starboard is 0.79; midship is 0.48
+    # NOTE: max port ADC value for ballast is 0.16; starboard is 0.83; midship is 0.5
     portRoll # True or False depending on whether we want to lean to the left/port (true) or right/starboard (false)
     if len(self.lastWinds) == 0:
         return # failsafe if we have received no data on wind to prevent crash
@@ -31,7 +31,7 @@ def ballast_alg_passive(): # this alg tells the ballast to go hard port or hard 
     if (portRoll): # if we are leaning port
         adcError = adc - 0.16 # because the max port ADC value from the potentiometer is 0.16
     else: # if we are leaning starboard
-        adcError = 0.79 - adc # because the max starboard ADC value from the potentiometer is 0.79
+        adcError = 0.83 - adc # because the max starboard ADC value from the potentiometer is 0.83
     
     # make more efficient with rolling overwrite # used in integral error and derivative error
     # prevErrors[4] = prevErrors[3]
@@ -54,10 +54,10 @@ def ballast_alg_passive(): # this alg tells the ballast to go hard port or hard 
         # being full tilt port and 130 being full tilt starboard; 95 is the median value
         ballast_speed = 95
         if (portRoll): # if the motor needs to send the ballast to port
-            ballast_speed -= (errorSum * 110.0) # the max errorSum value can be is ~0.33, so this means the max
+            ballast_speed -= (errorSum * 105.0) # the max errorSum value can be is ~0.33, so this means the max
                                                 # speed can be approximately at 60
         else:
-            ballast_speed += (errorSum * 110.0) # the max errorSum value can be is ~0.33, so this means the max
+            ballast_speed += (errorSum * 105.0) # the max errorSum value can be is ~0.33, so this means the max
                                                 # speed can be approximately at 130
 
         ballast_json = {"channel": "12", "angle": ballast_speed} # create a json file to send to the motor
