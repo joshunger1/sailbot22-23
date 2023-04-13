@@ -48,9 +48,9 @@ class AirmarReader(Node): #translates airmar data into json and publishes on 'ai
                 if(args[4] == 'W'):
                     lon *= -1
 
-                return {"Latitude":lat,
+                return {"Latitude":lat_raw,
                         "Latitude-direction":args[2],
-                        "Longitude":lon,
+                        "Longitude":lon_raw,
                         "Longitude-direction":args[4]}
             elif(type_code == 'VTG'):
                 return {"track-degrees-true":args[1],

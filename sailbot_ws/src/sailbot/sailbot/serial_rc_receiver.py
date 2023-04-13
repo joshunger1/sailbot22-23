@@ -103,6 +103,8 @@ class SerialRCReceiver(Node):
         self.serialData.channels = []
         dataChannels = self.serialData.channels
 
+        # this block, as far as we know, essentially checks serial data to make sure it's correct
+        # and that no data was lost/corrupted.  If the data was good, it returns true
         dataChannels.append((self.buffer[1] | self.buffer[2] << 8) & 0x07FF)  # Channel 0
         dataChannels.append((self.buffer[2] >> 3 | self.buffer[3] << 5) & 0x07FF)  # Channel 1
         dataChannels.append((self.buffer[3] >> 6 | self.buffer[4] << 2 | self.buffer[5] << 10) & 0x07FF)  # Channel 2

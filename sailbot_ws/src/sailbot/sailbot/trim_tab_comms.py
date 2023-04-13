@@ -10,7 +10,7 @@ from enum import Enum
 from std_msgs.msg import Int8, Int16, Float32
 
 
-ble_address = "F0:08:D1:CE:D8:52"  # Trim Tab controller BLE address
+ble_address = "30:c6:f7:02:70:56"  # Trim Tab controller BLE address
 uuid16_dict = {v: k for k, v in uuid16_dict.items()}
 
 # Characteristic UUIDs
