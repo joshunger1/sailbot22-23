@@ -66,7 +66,7 @@ def ballast_alg_passive(): # this alg tells the ballast to go hard port or hard 
     ballast_json = {"channel": "12", "angle": 0} # despite being outside the range of 60-130, sending 0 stops the ballast motor for some reason
     self.pwm_control_publisher_.publish(self.make_json_string(ballast_json))
 
-
+#TO FIX: add ADC based safeguard so the ballast doesn't try to go off the rail/past the limits!
 def ballast_alg_active(): # unlike the passive alg, this is designed to aim for the +/-20 degree angle at all times
     # NOTE: max port ADC value for ballast is 0.16; starboard is 0.79; midship is 0.48
     portRoll # True or False depending on whether we want to lean to the left/port (true) or right/starboard (false)
