@@ -6,7 +6,7 @@ from launch_ros.actions import Node
 def generate_launch_description():
     jetson_clocks_fan = ExecuteProcess(
         cmd=['/usr/bin/env', 'expect', '-f', '-'],
-        input='spawn sudo jetson_clocks --fan\nexpect "Password:"\nsend "YourPasswordHere\\r"\ninteract'
+        input='spawn sudo jetson_clocks --fan\nexpect "Password:"\nsend "admin\\r"\ninteract'
     )
 
     pwm = Node(
