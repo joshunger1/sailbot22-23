@@ -330,7 +330,7 @@ def main(args=None):
                     ballast_angle = 130
                 elif control_system.serial_rc["ballast"] < 800:
                     ballast_angle = 60
-                ballast_json = {"channel": "12", "angle": ballast_angle}
+                ballast_json = {"channel" : "12", "angle" : ballast_angle}
                 control_system.pwm_control_publisher_.publish(control_system.make_json_string(ballast_json))
             else:
                 control_system.ballast_algorithm()
