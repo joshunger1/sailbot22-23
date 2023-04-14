@@ -154,8 +154,9 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
             ballast_speed += (error_sum * 1.75)  # the max error_sum value can be is ~20, so this means the max
             # speed can be approximately at 60 (or 130)
 
-            ballast_json = {"channel": "12", "angle": ballast_speed}  # create a json file to send to the motor
-            self.pwm_control_publisher_.publish(self.make_json_string(ballast_json))  # publish the json
+            if (self.ballast_adc_value > 0.25) or (self.ballast_adc_value < 0.75):
+                ballast_json = {"channel": "12", "angle": ballast_speed}  # create a json file to send to the motor
+                self.pwm_control_publisher_.publish(self.make_json_string(ballast_json))  # publish the json
         # ...otherwise, if we want the ballast to stay still:
         ballast_json = {"channel": "12", "angle": 0}
         # despite being outside the range of 60-130, sending 0 stops the ballast motor for some reason
