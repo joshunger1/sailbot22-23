@@ -356,8 +356,6 @@ def main(args=None):
         elif float(control_system.serial_rc["state2"]) < 600:
             control_system.get_logger().error("Currently in AUTONOMOUS")
 
-            curr_adc = control_system.calcADC()
-
             control_system.get_logger().error(control_system.ballast_adc_data)
 
             # # Control Trim Tab
