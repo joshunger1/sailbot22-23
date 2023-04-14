@@ -59,7 +59,7 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         self.serial_rc = {}
         self.airmar_data = {}
         self.trim_tab_status = {}
-        self.ballast_adc_data = {}
+        self.ballast_adc_value = None
 
         # Create instance var for keeping queue of wind data
         self.lastWinds = []
@@ -211,10 +211,8 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
             self.airmar_data[i] = msg_dict[i]
 
     def ballast_adc_listener_callback(self, msg):
+        self.ballast_adc_value = msg.data
         self.get_logger().error('Received msg: "%s"' % msg.data)
-        msg_dict = json.loads(msg.data)
-        for i in msg_dict:
-            self.ballast_adc_data[i] = msg_dict[i]
 
     def trim_tab_telemetry_listener_callback(self, msg):
         self.get_logger().info('Received msg: "%s"' % msg.data)
@@ -356,6 +354,8 @@ def main(args=None):
         elif float(control_system.serial_rc["state2"]) < 600:
             control_system.get_logger().error("Currently in AUTONOMOUS")
 
+            ballast_adc_val = control_system.ballast_adc_val  # get the saved value
+            control_system.get_logger().error(f"Ballast ADC value: {ballast_adc_val}")
 
             # # Control Trim Tab
             # if "wind-angle-relative" in control_system.airmar_data:
