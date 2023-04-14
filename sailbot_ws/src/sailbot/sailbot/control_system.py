@@ -116,7 +116,7 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         # NOTE: max port ADC values for ballast is 0.16; starboard is 0.79; midship is 0.48
         # True or False depending on whether we want to lean to the left/port (true) or right/starboard (
         # false)
-        my_string = ''.join(str(e) for e in self.lastWinds)
+        my_string = '-'.join(str(e) for e in self.lastWinds)
         self.get_logger().error(my_string)
         if len(self.lastWinds) == 0:
             return  # failsafe if we have received no data on wind to prevent crash
@@ -158,12 +158,14 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
                 self.get_logger().error("trying to move")
                 ballast_json = {"channel": "12", "angle": ballast_speed}  # create a json file to send to the motor
                 self.pwm_control_publisher_.publish(self.make_json_string(ballast_json))  # publish the json
+                return
         # ...otherwise, if we want the ballast to stay still:
 
         self.get_logger().error("staying in middle")
         ballast_json = {"channel": "12", "angle": 0}
         # despite being outside the range of 60-130, sending 0 stops the ballast motor for some reason
         self.pwm_control_publisher_.publish(self.make_json_string(ballast_json))
+        return
 
     def calc_heading(self):  # calculate the heading we should follow
 
