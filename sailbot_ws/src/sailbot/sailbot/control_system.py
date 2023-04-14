@@ -59,7 +59,7 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         self.serial_rc = {}
         self.airmar_data = {}
         self.trim_tab_status = {}
-        self.ballast_adc_value = None
+        self.ballast_adc_value = 0.5
 
         # Create instance var for keeping queue of wind data
         self.lastWinds = []
