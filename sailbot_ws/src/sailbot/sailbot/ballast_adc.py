@@ -11,7 +11,7 @@ class BallastADC(Node):
         # info for the Ballast i2c ADC value
         self.bus = smbus.SMBus(0)  # use 0 for older versions of Jetson Nano
         self.address = 0x48  # address of the adc
-        self.ballast_adc_publisher = self.create_publisher(Float32, 'ballast_adc_vals', 10)  # Wind direction
+        self.ballast_adc_publisher = self.create_publisher(float, 'ballast_adc_vals', 10)  # Wind direction
 
         timer_period = 1  # Fetch data every 1 second
         self.timer = self.create_timer(timer_period, self.timer_callback)

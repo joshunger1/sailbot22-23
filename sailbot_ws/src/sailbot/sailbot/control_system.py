@@ -355,7 +355,7 @@ def main(args=None):
             control_system.get_logger().error("Currently in AUTONOMOUS")
 
             ballast_adc_val = control_system.ballast_adc_value  # get the saved value
-            control_system.get_logger().error(f"Ballast ADC value: {ballast_adc_val}")
+            control_system.get_logger().error(f"Ballast ADC value: {str(ballast_adc_val)}")
 
             # # Control Trim Tab
             # if "wind-angle-relative" in control_system.airmar_data:
