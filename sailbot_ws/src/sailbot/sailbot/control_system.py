@@ -100,7 +100,7 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         self.ki = 0.01
         self.kd = 0.1
         self.activeKp = 0.5
-        self.portRoll = True  # need info on how to track
+        self.port_roll = None  # need info on how to track
         self.adc = 0.48
 
     def checkDesiredRoll(self):
@@ -115,7 +115,7 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         # delta = self.airmar_data["roll"] - self.lastRollAngle[-1]
 
     # TO FIX: add ADC based safeguard so the ballast doesn't try to go off the rail/past the limits!
-    def ballast_alg_active(self, roll_error=None):  # unlike the passive alg, this is designed to aim for the +/-20 degree angle at all times
+    def ballast_alg_active(self):  # unlike the passive alg, this is designed to aim for the +/-20 degree angle at all times
         # NOTE: max port ADC values for ballast is 0.16; starboard is 0.79; midship is 0.48
         # True or False depending on whether we want to lean to the left/port (true) or right/starboard (
         # false)
@@ -124,7 +124,6 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         else:
             self.port_roll = self.checkDesiredRoll()
 
-        roll_error
         if self.port_roll:  # if we are leaning port
             roll_error = 20 + self.airmar_data["roll"]  # -20 is our desired goal
         else:  # if we are leaning starboard
@@ -155,9 +154,12 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
             # speed can be approximately at 60 (or 130)
 
             if (self.ballast_adc_value > 0.25) or (self.ballast_adc_value < 0.75):
+                self.get_logger().error("trying to move")
                 ballast_json = {"channel": "12", "angle": ballast_speed}  # create a json file to send to the motor
                 self.pwm_control_publisher_.publish(self.make_json_string(ballast_json))  # publish the json
         # ...otherwise, if we want the ballast to stay still:
+
+        self.get_logger().error("staying in middle")
         ballast_json = {"channel": "12", "angle": 0}
         # despite being outside the range of 60-130, sending 0 stops the ballast motor for some reason
         self.pwm_control_publisher_.publish(self.make_json_string(ballast_json))
