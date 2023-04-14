@@ -107,7 +107,7 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         # Check wind angle, then check current tilt of boat, then adjust ballast accordingly
         self.lastRollAngle.append(self.airmar_data["roll"])
         smooth_angle = self.median(self.lastWinds)
-        if (0 < smooth_angle <= 180):  # starboard tack
+        if 0 < smooth_angle <= 180:  # starboard tack
             return False
         else:
             return True  # port tack
@@ -123,6 +123,8 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
             return  # failsafe if we have received no data on wind to prevent crash
         else:
             self.port_roll = self.checkDesiredRoll()
+
+        self.get_logger().error("within ballast alg")
 
         if self.port_roll:  # if we are leaning port
             roll_error = 20 + self.airmar_data["roll"]  # -20 is our desired goal
@@ -389,6 +391,7 @@ def main(args=None):
 
             # ballast_adc_val = control_system.ballast_adc_value  # get the saved value
             # control_system.get_logger().error(f"Ballast ADC value: {str(ballast_adc_val)}")
+            control_system.get_logger().error(str(control_system.airmar_data["roll"]))
             control_system.ballast_alg_active()
 
 
