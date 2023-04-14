@@ -105,9 +105,9 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         self.lastRollAngle.append(self.airmar_data["pitchroll"]["roll"])
         smooth_angle = self.median(self.lastWinds)
         if 0 < smooth_angle <= 180:  # starboard tack
-            return False
+            return True
         else:
-            return True  # port tack
+            return False  # port tack
         # self.get_logger().info("roll:" + self.airmar_data["roll"])
         # delta = self.airmar_data["roll"] - self.lastRollAngle[-1]
 
