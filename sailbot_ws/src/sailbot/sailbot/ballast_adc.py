@@ -13,7 +13,7 @@ class BallastADC(Node):
         self.address = 0x48  # address of the adc
         self.ballast_adc_publisher = self.create_publisher(Float32, 'ballast_adc_vals', 10)  # Wind direction
 
-        timer_period = 1  # Fetch data every 1 second
+        timer_period = 0.5  # Fetch data every 1 second
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
     def timer_callback(self):
