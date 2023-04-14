@@ -340,10 +340,10 @@ def main(args=None):
             if float(control_system.serial_rc["state1"]) < 800:
                 ballast_angle = 0
                 if control_system.serial_rc["ballast"] > 1200:
-                    if control_system.ballast_adc_value > 0.2:
+                    if control_system.ballast_adc_value > 0.25:
                         ballast_angle = 130
                 elif control_system.serial_rc["ballast"] < 800:
-                    if control_system.ballast_adc_value < 0.8:
+                    if control_system.ballast_adc_value < 0.75:
                         ballast_angle = 60
                 ballast_json = {"channel": "12", "angle": ballast_angle}
                 control_system.pwm_control_publisher_.publish(control_system.make_json_string(ballast_json))
