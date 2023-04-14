@@ -90,7 +90,31 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
 
     def calcADC(self):
         config = [0x40,0x83]
+	    bus.write_i2c_block_data(address, 0x01, config)
+	    time.sleep(0.1)
+	    # read the data from the ADC
+	    data = bus.read_i2c_block_data(address, 0x00)
+	    reading1 = (((data[0] << 8)&0xFF00) + (data[1]&0x00FF)) #Analog pin from POT
 
+	    time.sleep(0.1)
+	    # convert the data to a voltage
+	    config = [0x50, 0x83]   # configuration for the ADC
+	    bus.write_i2c_block_data(address, 0x01, config) #tell the ADC to read off of the other pin
+	    time.sleep(0.1)
+	    data = bus.read_i2c_block_data(address, 0x00)
+	    reading2 = (((data[0] << 8)&0xFF00) + (data[1]&0x00FF)) #supply voltage
+
+
+	    feedbackVoltage = reading1 * 6.144 / 32767.0
+	    supplyVoltage = reading2 * 6.144 / 32767.0
+	    relativePosition = feedbackVoltage / supplyVoltage
+
+	    print("Supply", supplyVoltage)
+
+	    print("Feedback", feedbackVoltage)
+	    print("Relative Position: ", relativePosition)
+
+	    time.sleep(1)
 
     def calc_heading(self):  # calculate the heading we should follow
 
