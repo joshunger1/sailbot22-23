@@ -92,6 +92,75 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         self.onA = False
         self.onB = False
 
+        # information stored for the ballast alg
+        # Replace angle with encoder positions or do conversions after the fact
+        self.prevErrors = [0, 0, 0, 0, 0]
+        self.errorSum = 0
+        self.kp = 0.5
+        self.ki = 0.01
+        self.kd = 0.1
+        self.activeKp = 0.5
+        self.portRoll = True  # need info on how to track
+        self.adc = 0.48
+
+    def checkDesiredRoll(self):
+        # Check wind angle, then check current tilt of boat, then adjust ballast accordingly
+        self.lastRollAngle.append(self.airmar_data["roll"])
+        smooth_angle = self.median(self.lastWinds)
+        if (0 < smooth_angle <= 180):  # starboard tack
+            return False
+        else:
+            return True  # port tack
+        # self.get_logger().info("roll:" + self.airmar_data["roll"])
+        # delta = self.airmar_data["roll"] - self.lastRollAngle[-1]
+
+    # TO FIX: add ADC based safeguard so the ballast doesn't try to go off the rail/past the limits!
+    def ballast_alg_active(self, roll_error=None):  # unlike the passive alg, this is designed to aim for the +/-20 degree angle at all times
+        # NOTE: max port ADC values for ballast is 0.16; starboard is 0.79; midship is 0.48
+        # True or False depending on whether we want to lean to the left/port (true) or right/starboard (
+        # false)
+        if len(self.lastWinds) == 0:
+            return  # failsafe if we have received no data on wind to prevent crash
+        else:
+            self.port_roll = self.checkDesiredRoll()
+
+        roll_error
+        if self.port_roll:  # if we are leaning port
+            roll_error = 20 + self.airmar_data["roll"]  # -20 is our desired goal
+        else:  # if we are leaning starboard
+            roll_error = -20 + self.airmar_data["roll"]  # 20 is our desired goal
+
+        # make more efficient with rolling overwrite # used in integral error and derivative error
+        # prevErrors[4] = prevErrors[3]
+        # prevErrors[3] = prevErrors[2]
+        # prevErrors[2] = prevErrors[1]
+        # prevErrors[1] = prevErrors[0]
+        # prevErrors[0] = adcError
+
+        if roll_error > 1 or roll_error < -1:  # if the ballast needs to move...
+            # integralAngleError = sum(prevErrors) derivativeAngleError = (adcError - prevErrors[1])*0.01 # Change
+            # 0.01 to avg time between changes [or just delete derivative lol]
+
+            error_sum = roll_error * self.activeKp  # + integralAngleError * ki #+ derivativeAngleError * kd
+
+            if -3 < roll_error < 3:  # if the ballast is close to its goal and needs to slow down (-2/2 was chosen
+                # arbitrarily)
+                error_sum /= (1.0 + roll_error / 2.0)  # this will linearly decrease the speed at which the ballast
+                # is moving based on how close the ballast is to its goal
+
+            # translate the PID error into our output range; the motor accepts 60-130, with 60
+            # being full tilt port and 130 being full tilt starboard; 95 is the median value
+            ballast_speed = 95
+            ballast_speed += (error_sum * 1.75)  # the max error_sum value can be is ~20, so this means the max
+            # speed can be approximately at 60 (or 130)
+
+            ballast_json = {"channel": "12", "angle": ballast_speed}  # create a json file to send to the motor
+            self.pwm_control_publisher_.publish(self.make_json_string(ballast_json))  # publish the json
+        # ...otherwise, if we want the ballast to stay still:
+        ballast_json = {"channel": "12", "angle": 0}
+        # despite being outside the range of 60-130, sending 0 stops the ballast motor for some reason
+        self.pwm_control_publisher_.publish(self.make_json_string(ballast_json))
+
     def calc_heading(self):  # calculate the heading we should follow
 
         # calculate BG (boat to goal vector)
@@ -358,6 +427,8 @@ def main(args=None):
 
             ballast_adc_val = control_system.ballast_adc_value  # get the saved value
             control_system.get_logger().error(f"Ballast ADC value: {str(ballast_adc_val)}")
+            control_system.ballast_algorithm()
+
 
             # # Control Trim Tab
             # if "wind-angle-relative" in control_system.airmar_data:
