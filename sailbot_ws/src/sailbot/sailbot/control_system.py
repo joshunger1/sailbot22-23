@@ -7,6 +7,7 @@ from std_msgs.msg import String, Float32, Int8, Int16
 from collections import deque
 import numpy as np
 import time
+import smbus
 
 
 class ControlSystem(Node):  # Gathers data from some nodes and distributes it to others
@@ -82,6 +83,14 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         self.onAB = False  # whether the boat is currently trying to sail a course on either side of the no-go zone
         self.onA = False
         self.onB = False
+
+        # info for the Ballast i2c ADC value
+        self.bus = smbus.SMBus(0)  # use 0 for older versions of Jetson Nano
+        self.address = 0x48  # address of the adc
+
+    def calcADC(self):
+        config = [0x40,0x83]
+
 
     def calc_heading(self):  # calculate the heading we should follow
 
@@ -350,10 +359,10 @@ def main(args=None):
             else:
                 control_system.get_logger().info("No wind angle values")
 
-            # if control_system.airmar_data["Latitude"] or control_system.airmar_data["Longitude"]:
-            #     control_system.boat = np.array([control_system.airmar_data["Latitude"], control_system.airmar_data["Longitude"]])
-            # else:
-            #     control_system.get_logger().error("No GPS Data")
+            if control_system.airmar_data["Latitude"] or control_system.airmar_data["Longitude"]:
+                control_system.boat = np.array([control_system.airmar_data["Latitude"], control_system.airmar_data["Longitude"]])
+            else:
+                control_system.get_logger().error("No GPS Data")
 
             curr_wind_value = control_system.update_winds(control_system.airmar_data["apparentWind"]["direction"])
             curr_heading_value = float(control_system.airmar_data["currentHeading"])
@@ -363,6 +372,7 @@ def main(args=None):
 
             control_system.wind = np.array([wind_sin, wind_cos])
 
+            desiredHeading = control_system.calc_heading()
 
             # # Attempting to read airmar data
             # control_system.get_logger().error("Current Heading: " + control_system.airmar_data["currentHeading"])
