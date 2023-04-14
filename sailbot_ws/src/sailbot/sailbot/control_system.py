@@ -126,9 +126,9 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         self.get_logger().error("within ballast alg")
 
         if self.port_roll:  # if we are leaning port
-            roll_error = 20 + self.airmar_data["pitchroll"]["roll"]  # -20 is our desired goal
+            roll_error = 20 + float(self.airmar_data["pitchroll"]["roll"])  # -20 is our desired goal
         else:  # if we are leaning starboard
-            roll_error = -20 + self.airmar_data["pitchroll"]["roll"]  # 20 is our desired goal
+            roll_error = -20 + float(self.airmar_data["pitchroll"]["roll"])  # 20 is our desired goal
 
         # make more efficient with rolling overwrite # used in integral error and derivative error
         # prevErrors[4] = prevErrors[3]
