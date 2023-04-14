@@ -4,7 +4,6 @@ from std_msgs.msg import Int8, Int16, Float32
 import time
 import smbus
 
-
 class BallastADC(Node):
     def __init__(self):
         super(BallastADC, self).__init__('ballast_adc')
@@ -16,6 +15,9 @@ class BallastADC(Node):
 
         timer_period = 1  # Fetch data every 1 second
         self.timer = self.create_timer(timer_period, self.timer_callback)
+
+    def timer_callback(self):
+        self.calcADC()
 
     def calcADC(self):
         config = [0x40, 0x83]
@@ -37,7 +39,7 @@ class BallastADC(Node):
         supply_voltage = reading2 * 6.144 / 32767.0
         relative_position = feedback_voltage/supply_voltage
         self.ballast_adc_publisher.publish(relative_position)
-        time.sleep(1)
+
 
 def main(args=None):
     rclpy.init(args=args)
@@ -45,7 +47,7 @@ def main(args=None):
     ballast_adc = BallastADC()
 
     rclpy.spin(ballast_adc)
-    ballast_adc.calcADC()
+
     ballast_adc.destroy_node()
     rclpy.shutdown()
 
