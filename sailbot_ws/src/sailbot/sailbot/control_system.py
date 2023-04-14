@@ -379,7 +379,7 @@ def main(args=None):
                 ballast_json = {"channel": "12", "angle": ballast_angle}
                 control_system.pwm_control_publisher_.publish(control_system.make_json_string(ballast_json))
             else:
-                control_system.ballast_algorithm()
+                control_system.ballast_alg_active()
             rudder_angle = (float(control_system.serial_rc["rudder"]) / 2000 * 90) + 25
             rudder_json = {"channel": "8", "angle": rudder_angle}
             control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
