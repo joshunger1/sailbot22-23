@@ -338,47 +338,6 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         s = sorted(lst)
         return (sum(s[n // 2 - 1:n // 2 + 1]) / 2.0, s[n // 2])[n % 2] if n else None
 
-    def ballast_algorithm(self):
-        # Check wind angle, then check current tilt of boat, then adjust ballast accordingly
-        if len(self.lastWinds) == 0:
-            return
-        self.lastRollAngle.append(self.airmar_data["roll"])
-        smooth_angle = self.median(self.lastWinds)
-        ballast_angle = 0
-        # self.get_logger().info("roll:" + self.airmar_data["roll"])
-        delta = self.airmar_data["roll"] - self.lastRollAngle[-1]
-
-        timeDifference = .5  # hypothetically - see main
-        omega_n = delta / timeDifference
-        self.omega.append(omega_n)
-        alpha_n = self.omega[-1] / timeDifference
-        self.alpha.append(alpha_n)
-        # -- Logging ----------------
-        self.ballast_algorithm_debug_publisher_.publish(
-            "omega: " + str(omega_n) + " -- " + "alpha / acceleration: " + str(alpha_n) + "\n")
-        # Account for a heavy tilt
-
-        # -----------
-        # Starboard tack
-        if 0 < smooth_angle <= 180:
-            # Go for 20 degrees
-            if float(self.airmar_data["roll"]) > -12:  # change to roll acc.
-                # ballast_angle = 110
-                ballast_angle = omega_n * 2
-            elif float(self.airmar_data["roll"]) < -20:  # change to roll acc.
-                ballast_angle = 80
-                # -----------
-        # Port tack
-        elif 180 < smooth_angle < 360:
-            if float(self.airmar_data["roll"]) < 12:
-                ballast_angle = 80
-            elif float(self.airmar_data["roll"]) > 20:
-                ballast_angle = 110
-
-        ballast_json = {"channel": "12", "angle": ballast_angle}
-        self.pwm_control_publisher_.publish(self.make_json_string(ballast_json))
-
-
 def main(args=None):
     rclpy.init(args=args)
 
@@ -430,7 +389,7 @@ def main(args=None):
 
             # ballast_adc_val = control_system.ballast_adc_value  # get the saved value
             # control_system.get_logger().error(f"Ballast ADC value: {str(ballast_adc_val)}")
-            control_system.ballast_algorithm()
+            control_system.ballast_alg_active()
 
 
             # # Control Trim Tab
