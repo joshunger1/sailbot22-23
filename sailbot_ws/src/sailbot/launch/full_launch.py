@@ -37,5 +37,10 @@ def generate_launch_description():
             package='sailbot',
             node_executable='serial_rc_receiver',
             name='rc_rcevr'
+        ),
+        Node(
+            package='sailbot',
+            node_executable='ballast_adc',
+            name='ballast_adc'
         )
     ])
