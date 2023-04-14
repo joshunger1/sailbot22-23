@@ -89,26 +89,24 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         self.address = 0x48  # address of the adc
 
     def calcADC(self):
-        config = [0x40,0x83]
+        config = [0x40, 0x83]
         self.bus.write_i2c_block_data(self.address, 0x01, config)
         time.sleep(0.1)
         # read the data from the ADC
         data = self.bus.read_i2c_block_data(self.address, 0x00)
-        reading1 = (((data[0] << 8)&0xFF00) + (data[1]&0x00FF)) #Analog pin from POT
+        reading1 = (((data[0] << 8) & 0xFF00) + (data[1] & 0x00FF))  # Analog pin from POT
 
         time.sleep(0.1)
         # convert the data to a voltage
-        config = [0x50, 0x83]   # configuration for the ADC
-        self.bus.write_i2c_block_data(self.address, 0x01, config) #tell the ADC to read off of the other pin
+        config = [0x50, 0x83]  # configuration for the ADC
+        self.bus.write_i2c_block_data(self.address, 0x01, config)  # tell the ADC to read off of the other pin
         time.sleep(0.1)
         data = self.bus.read_i2c_block_data(self.address, 0x00)
-        reading2 = (((data[0] << 8)&0xFF00) + (data[1]&0x00FF)) #supply voltage
+        reading2 = (((data[0] << 8) & 0xFF00) + (data[1] & 0x00FF))  # supply voltage
 
         feedback_voltage = reading1 * 6.144 / 32767.0
         supply_voltage = reading2 * 6.144 / 32767.0
         return feedback_voltage / supply_voltage
-
-
 
     def calc_heading(self):  # calculate the heading we should follow
 
@@ -357,7 +355,7 @@ def main(args=None):
                     ballast_angle = 130
                 elif control_system.serial_rc["ballast"] < 800:
                     ballast_angle = 60
-                ballast_json = {"channel" : "12", "angle" : ballast_angle}
+                ballast_json = {"channel": "12", "angle": ballast_angle}
                 control_system.pwm_control_publisher_.publish(control_system.make_json_string(ballast_json))
             else:
                 control_system.ballast_algorithm()
@@ -370,7 +368,7 @@ def main(args=None):
 
             curr_adc = control_system.calcADC()
 
-            control_system.get_logger().error(curr_adc)
+            control_system.get_logger().error(str(curr_adc))
 
             # # Control Trim Tab
             # if "wind-angle-relative" in control_system.airmar_data:
