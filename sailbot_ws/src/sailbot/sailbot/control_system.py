@@ -90,23 +90,23 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
 
     def calcADC(self):
         config = [0x40,0x83]
-	    self.bus.write_i2c_block_data(self.address, 0x01, config)
-	    time.sleep(0.1)
-	    # read the data from the ADC
-	    data = self.bus.read_i2c_block_data(self.address, 0x00)
-	    reading1 = (((data[0] << 8)&0xFF00) + (data[1]&0x00FF)) #Analog pin from POT
+        self.bus.write_i2c_block_data(self.address, 0x01, config)
+        time.sleep(0.1)
+        # read the data from the ADC
+        data = self.bus.read_i2c_block_data(self.address, 0x00)
+        reading1 = (((data[0] << 8)&0xFF00) + (data[1]&0x00FF)) #Analog pin from POT
 
-	    time.sleep(0.1)
-	    # convert the data to a voltage
-	    config = [0x50, 0x83]   # configuration for the ADC
-	    self.bus.write_i2c_block_data(self.address, 0x01, config) #tell the ADC to read off of the other pin
-	    time.sleep(0.1)
-	    data = self.bus.read_i2c_block_data(self.address, 0x00)
-	    reading2 = (((data[0] << 8)&0xFF00) + (data[1]&0x00FF)) #supply voltage
+        time.sleep(0.1)
+        # convert the data to a voltage
+        config = [0x50, 0x83]   # configuration for the ADC
+        self.bus.write_i2c_block_data(self.address, 0x01, config) #tell the ADC to read off of the other pin
+        time.sleep(0.1)
+        data = self.bus.read_i2c_block_data(self.address, 0x00)
+        reading2 = (((data[0] << 8)&0xFF00) + (data[1]&0x00FF)) #supply voltage
 
-	    feedback_voltage = reading1 * 6.144 / 32767.0
-	    supply_voltage = reading2 * 6.144 / 32767.0
-	    return feedback_voltage / supply_voltage
+        feedback_voltage = reading1 * 6.144 / 32767.0
+        supply_voltage = reading2 * 6.144 / 32767.0
+        return feedback_voltage / supply_voltage
 
 
 
