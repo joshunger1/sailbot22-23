@@ -106,6 +106,7 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
 
         feedback_voltage = reading1 * 6.144 / 32767.0
         supply_voltage = reading2 * 6.144 / 32767.0
+        time.sleep(1)
         return feedback_voltage / supply_voltage
 
     def calc_heading(self):  # calculate the heading we should follow
