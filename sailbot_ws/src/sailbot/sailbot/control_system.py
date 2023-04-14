@@ -97,12 +97,12 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         self.ki = 0.01
         self.kd = 0.1
         self.activeKp = 0.5
-        self.port_roll = True  # need info on how to track
+        self.port_roll = None  # need info on how to track
         self.adc = 0.48
 
     def checkDesiredRoll(self):
         # Check wind angle, then check current tilt of boat, then adjust ballast accordingly
-        self.lastRollAngle.append(self.airmar_data["roll"])
+        self.lastRollAngle.append(self.airmar_data["pitchroll"]["roll"])
         smooth_angle = self.median(self.lastWinds)
         if 0 < smooth_angle <= 180:  # starboard tack
             return False
@@ -120,8 +120,8 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         self.get_logger().error(my_string)
         if len(self.lastWinds) == 0:
             return  # failsafe if we have received no data on wind to prevent crash
-        # else:
-        #     self.port_roll = self.checkDesiredRoll()
+        else:
+            self.port_roll = self.checkDesiredRoll()
 
         self.get_logger().error("within ballast alg")
 
