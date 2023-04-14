@@ -211,7 +211,7 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
             self.airmar_data[i] = msg_dict[i]
 
     def ballast_adc_listener_callback(self, msg):
-        self.get_logger().info('Received msg: "%s"' % msg.data)
+        self.get_logger().error('Received msg: "%s"' % msg.data)
         msg_dict = json.loads(msg.data)
         for i in msg_dict:
             self.ballast_adc_data[i] = msg_dict[i]
@@ -356,7 +356,6 @@ def main(args=None):
         elif float(control_system.serial_rc["state2"]) < 600:
             control_system.get_logger().error("Currently in AUTONOMOUS")
 
-            control_system.get_logger().error(control_system.ballast_adc_data)
 
             # # Control Trim Tab
             # if "wind-angle-relative" in control_system.airmar_data:
