@@ -90,31 +90,25 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
 
     def calcADC(self):
         config = [0x40,0x83]
-	    bus.write_i2c_block_data(address, 0x01, config)
+	    self.bus.write_i2c_block_data(self.address, 0x01, config)
 	    time.sleep(0.1)
 	    # read the data from the ADC
-	    data = bus.read_i2c_block_data(address, 0x00)
+	    data = self.bus.read_i2c_block_data(self.address, 0x00)
 	    reading1 = (((data[0] << 8)&0xFF00) + (data[1]&0x00FF)) #Analog pin from POT
 
 	    time.sleep(0.1)
 	    # convert the data to a voltage
 	    config = [0x50, 0x83]   # configuration for the ADC
-	    bus.write_i2c_block_data(address, 0x01, config) #tell the ADC to read off of the other pin
+	    self.bus.write_i2c_block_data(self.address, 0x01, config) #tell the ADC to read off of the other pin
 	    time.sleep(0.1)
-	    data = bus.read_i2c_block_data(address, 0x00)
+	    data = self.bus.read_i2c_block_data(self.address, 0x00)
 	    reading2 = (((data[0] << 8)&0xFF00) + (data[1]&0x00FF)) #supply voltage
 
+	    feedback_voltage = reading1 * 6.144 / 32767.0
+	    supply_voltage = reading2 * 6.144 / 32767.0
+	    return feedback_voltage / supply_voltage
 
-	    feedbackVoltage = reading1 * 6.144 / 32767.0
-	    supplyVoltage = reading2 * 6.144 / 32767.0
-	    relativePosition = feedbackVoltage / supplyVoltage
 
-	    print("Supply", supplyVoltage)
-
-	    print("Feedback", feedbackVoltage)
-	    print("Relative Position: ", relativePosition)
-
-	    time.sleep(1)
 
     def calc_heading(self):  # calculate the heading we should follow
 
@@ -374,29 +368,33 @@ def main(args=None):
         elif float(control_system.serial_rc["state2"]) < 600:
             control_system.get_logger().error("Currently in AUTONOMOUS")
 
-            # Control Trim Tab
-            if "wind-angle-relative" in control_system.airmar_data:
-                try:
-                    control_system.find_trim_tab_state(control_system.airmar_data["apparentWind"]["direction"])
-                except Exception as e:
-                    control_system.get_logger().error(str(e))
-            else:
-                control_system.get_logger().info("No wind angle values")
+            curr_adc = control_system.calcADC()
 
-            if control_system.airmar_data["Latitude"] or control_system.airmar_data["Longitude"]:
-                control_system.boat = np.array([control_system.airmar_data["Latitude"], control_system.airmar_data["Longitude"]])
-            else:
-                control_system.get_logger().error("No GPS Data")
+            control_system.get_logger().error(curr_adc)
 
-            curr_wind_value = control_system.update_winds(control_system.airmar_data["apparentWind"]["direction"])
-            curr_heading_value = float(control_system.airmar_data["currentHeading"])
-            true_wind_value = (curr_wind_value + curr_heading_value) % 360
-            wind_cos = math.cos(-true_wind_value)
-            wind_sin = math.sin(-true_wind_value)
-
-            control_system.wind = np.array([wind_sin, wind_cos])
-
-            desiredHeading = control_system.calc_heading()
+            # # Control Trim Tab
+            # if "wind-angle-relative" in control_system.airmar_data:
+            #     try:
+            #         control_system.find_trim_tab_state(control_system.airmar_data["apparentWind"]["direction"])
+            #     except Exception as e:
+            #         control_system.get_logger().error(str(e))
+            # else:
+            #     control_system.get_logger().info("No wind angle values")
+            #
+            # if control_system.airmar_data["Latitude"] or control_system.airmar_data["Longitude"]:
+            #     control_system.boat = np.array([control_system.airmar_data["Latitude"], control_system.airmar_data["Longitude"]])
+            # else:
+            #     control_system.get_logger().error("No GPS Data")
+            #
+            # curr_wind_value = control_system.update_winds(control_system.airmar_data["apparentWind"]["direction"])
+            # curr_heading_value = float(control_system.airmar_data["currentHeading"])
+            # true_wind_value = (curr_wind_value + curr_heading_value) % 360
+            # wind_cos = math.cos(-true_wind_value)
+            # wind_sin = math.sin(-true_wind_value)
+            #
+            # control_system.wind = np.array([wind_sin, wind_cos])
+            #
+            # desiredHeading = control_system.calc_heading()
 
             # # Attempting to read airmar data
             # control_system.get_logger().error("Current Heading: " + control_system.airmar_data["currentHeading"])
