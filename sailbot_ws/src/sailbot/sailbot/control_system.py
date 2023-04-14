@@ -38,6 +38,13 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
             10)
         self.trim_tab_telemetry_subscription
 
+        self.ballast_adc_subscription = self.create_subscription(
+            Float32,
+            'ballast_adc_vals',
+            self.ballast_adc_listener_callback,
+            10)
+        self.ballast_adc_subscription
+
         # Create publisher to pwm_control
         self.pwm_control_publisher_ = self.create_publisher(String, 'pwm_control', 10)
 
@@ -52,6 +59,7 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         self.serial_rc = {}
         self.airmar_data = {}
         self.trim_tab_status = {}
+        self.ballast_adc_data = {}
 
         # Create instance var for keeping queue of wind data
         self.lastWinds = []
@@ -83,31 +91,6 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         self.onAB = False  # whether the boat is currently trying to sail a course on either side of the no-go zone
         self.onA = False
         self.onB = False
-
-        # info for the Ballast i2c ADC value
-        self.bus = smbus.SMBus(0)  # use 0 for older versions of Jetson Nano
-        self.address = 0x48  # address of the adc
-
-    def calcADC(self):
-        config = [0x40, 0x83]
-        self.bus.write_i2c_block_data(self.address, 0x01, config)
-        time.sleep(0.1)
-        # read the data from the ADC
-        data = self.bus.read_i2c_block_data(self.address, 0x00)
-        reading1 = (((data[0] << 8) & 0xFF00) + (data[1] & 0x00FF))  # Analog pin from POT
-
-        time.sleep(0.1)
-        # convert the data to a voltage
-        config = [0x50, 0x83]  # configuration for the ADC
-        self.bus.write_i2c_block_data(self.address, 0x01, config)  # tell the ADC to read off of the other pin
-        time.sleep(0.1)
-        data = self.bus.read_i2c_block_data(self.address, 0x00)
-        reading2 = (((data[0] << 8) & 0xFF00) + (data[1] & 0x00FF))  # supply voltage
-
-        feedback_voltage = reading1 * 6.144 / 32767.0
-        supply_voltage = reading2 * 6.144 / 32767.0
-        time.sleep(1)
-        return feedback_voltage / supply_voltage
 
     def calc_heading(self):  # calculate the heading we should follow
 
@@ -226,6 +209,12 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         msg_dict = json.loads(msg.data)
         for i in msg_dict:
             self.airmar_data[i] = msg_dict[i]
+
+    def ballast_adc_listener_callback(self, msg):
+        self.get_logger().info('Received msg: "%s"' % msg.data)
+        msg_dict = json.loads(msg.data)
+        for i in msg_dict:
+            self.ballast_adc_data[i] = msg_dict[i]
 
     def trim_tab_telemetry_listener_callback(self, msg):
         self.get_logger().info('Received msg: "%s"' % msg.data)
@@ -369,7 +358,7 @@ def main(args=None):
 
             curr_adc = control_system.calcADC()
 
-            control_system.get_logger().error(str(curr_adc))
+            control_system.get_logger().error(control_system.ballast_adc_data)
 
             # # Control Trim Tab
             # if "wind-angle-relative" in control_system.airmar_data:

@@ -160,15 +160,15 @@ class TrimTabComms(Node):
         loop.run_until_complete(self.ble_write())
     
     def angle_callback(self, msg):
-    	""" Subscription handler for trim tab angle updates (Manual mode) """
-    	self.get_logger().debug("Updating manual trim tab angle")
-    	global angle
-    	angle = msg.data
-    	
-    	# Send new angle to trim tab controller
-    	loop = asyncio.get_event_loop()
-    	asyncio.set_event_loop(loop)
-    	loop.run_until_complete(self.ble_write())
+        """ Subscription handler for trim tab angle updates (Manual mode) """
+        self.get_logger().debug("Updating manual trim tab angle")
+        global angle
+        angle = msg.data
+
+        # Send new angle to trim tab controller
+        loop = asyncio.get_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(self.ble_write())
 
 
 def main(args=None):
