@@ -1,13 +1,10 @@
-import math
-from time import time
 import rclpy
 from rclpy.node import Node
 import json
 from std_msgs.msg import String, Float32, Int8, Int16
 from collections import deque
 import numpy as np
-import time
-import smbus
+import math
 
 
 class ControlSystem(Node):  # Gathers data from some nodes and distributes it to others
@@ -114,11 +111,12 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         # self.get_logger().info("roll:" + self.airmar_data["roll"])
         # delta = self.airmar_data["roll"] - self.lastRollAngle[-1]
 
-    # TO FIX: add ADC based safeguard so the ballast doesn't try to go off the rail/past the limits!
-    def ballast_alg_active(self):  # unlike the passive alg, this is designed to aim for the +/-20 degree angle at all times
+    # unlike the passive alg, this is designed to aim for the +/-20 degree angle at all times
+    def ballast_alg_active(self):
         # NOTE: max port ADC values for ballast is 0.16; starboard is 0.79; midship is 0.48
         # True or False depending on whether we want to lean to the left/port (true) or right/starboard (
         # false)
+        self.get_logger().error(self.lastWinds[-1])
         if len(self.lastWinds) == 0:
             return  # failsafe if we have received no data on wind to prevent crash
         # else:
@@ -272,6 +270,11 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         self.get_logger().info("you shouldn't be seeing this")
         return np.array(1, 1)
 
+    def unit_circle_to_heading(self, x, y):
+        """Convert unit circle (x, y) coordinates to heading angle in degrees."""
+        angle = math.degrees(math.atan2(y, x))
+        return angle + 360 if angle < 0 else angle
+
     def serial_rc_listener_callback(self, msg):
         self.get_logger().info('Received msg: "%s"' % msg.data)
         msg_dict = json.loads(msg.data)
@@ -387,12 +390,14 @@ def main(args=None):
             control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
 
         elif float(control_system.serial_rc["state2"]) < 600:
-            # control_system.get_logger().error("Currently in AUTONOMOUS")
+            control_system.get_logger().error("Currently in AUTONOMOUS")
 
             # ballast_adc_val = control_system.ballast_adc_value  # get the saved value
             # control_system.get_logger().error(f"Ballast ADC value: {str(ballast_adc_val)}")
             control_system.get_logger().error(str(control_system.airmar_data["pitchroll"]["roll"]))
             control_system.ballast_alg_active()
+
+
 
 
             # # Control Trim Tab
