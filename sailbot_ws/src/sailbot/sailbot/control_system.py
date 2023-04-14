@@ -159,11 +159,16 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
                 ballast_json = {"channel": "12", "angle": ballast_speed}  # create a json file to send to the motor
                 self.pwm_control_publisher_.publish(self.make_json_string(ballast_json))  # publish the json
                 return
-        # ...otherwise, if we want the ballast to stay still:
-
-        self.get_logger().error("staying in middle")
+            # ...otherwise, if we want the ballast to stay still:
+            else:
+                self.get_logger().error("staying in middle")
+                ballast_json = {"channel": "12", "angle": 0}
+                # despite being outside the range of 60-130, sending 0 stops the ballast motor for some reason
+                self.pwm_control_publisher_.publish(self.make_json_string(ballast_json))
+                return
+        # this should not happen
+        self.get_logger().error("you should not see this")
         ballast_json = {"channel": "12", "angle": 0}
-        # despite being outside the range of 60-130, sending 0 stops the ballast motor for some reason
         self.pwm_control_publisher_.publish(self.make_json_string(ballast_json))
         return
 
