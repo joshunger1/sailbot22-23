@@ -116,7 +116,8 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         # NOTE: max port ADC values for ballast is 0.16; starboard is 0.79; midship is 0.48
         # True or False depending on whether we want to lean to the left/port (true) or right/starboard (
         # false)
-        self.get_logger().error(self.lastWinds[-1])
+        my_string = ''.join(str(e) for e in self.lastWinds)
+        self.get_logger().error(my_string)
         if len(self.lastWinds) == 0:
             return  # failsafe if we have received no data on wind to prevent crash
         # else:
