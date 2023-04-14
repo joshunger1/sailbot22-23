@@ -354,7 +354,7 @@ def main(args=None):
         elif float(control_system.serial_rc["state2"]) < 600:
             control_system.get_logger().error("Currently in AUTONOMOUS")
 
-            ballast_adc_val = control_system.ballast_adc_val  # get the saved value
+            ballast_adc_val = control_system.ballast_adc_value  # get the saved value
             control_system.get_logger().error(f"Ballast ADC value: {ballast_adc_val}")
 
             # # Control Trim Tab
