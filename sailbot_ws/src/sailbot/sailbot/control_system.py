@@ -426,10 +426,10 @@ def main(args=None):
             control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
 
         elif float(control_system.serial_rc["state2"]) < 600:
-            control_system.get_logger().error("Currently in AUTONOMOUS")
+            # control_system.get_logger().error("Currently in AUTONOMOUS")
 
-            ballast_adc_val = control_system.ballast_adc_value  # get the saved value
-            control_system.get_logger().error(f"Ballast ADC value: {str(ballast_adc_val)}")
+            # ballast_adc_val = control_system.ballast_adc_value  # get the saved value
+            # control_system.get_logger().error(f"Ballast ADC value: {str(ballast_adc_val)}")
             control_system.ballast_algorithm()
 
 
