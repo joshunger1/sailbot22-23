@@ -396,6 +396,7 @@ def main(args=None):
             # ballast_adc_val = control_system.ballast_adc_value  # get the saved value
             # control_system.get_logger().error(f"Ballast ADC value: {str(ballast_adc_val)}")
             control_system.get_logger().error(str(control_system.airmar_data["pitchroll"]["roll"]))
+            control_system.update_winds(control_system.airmar_data["apparentWind"]["direction"])
             control_system.ballast_alg_active()
 
 
