@@ -154,7 +154,13 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
             ballast_speed += (error_sum * 1.75)  # the max error_sum value can be is ~20, so this means the max
             # speed can be approximately at 60 (or 130)
 
-            if (self.ballast_adc_value > 0.25) and (self.ballast_adc_value < 0.75):
+            if (self.ballast_adc_value > 0.25) and self.port_roll:
+                self.get_logger().error("trying to move")
+                ballast_json = {"channel": "12", "angle": ballast_speed}  # create a json file to send to the motor
+                self.pwm_control_publisher_.publish(self.make_json_string(ballast_json))  # publish the json
+                return
+
+            if (self.ballast_adc_value < 0.75) and (not self.port_roll):
                 self.get_logger().error("trying to move")
                 ballast_json = {"channel": "12", "angle": ballast_speed}  # create a json file to send to the motor
                 self.pwm_control_publisher_.publish(self.make_json_string(ballast_json))  # publish the json
@@ -351,6 +357,7 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         s = sorted(lst)
         return (sum(s[n // 2 - 1:n // 2 + 1]) / 2.0, s[n // 2])[n % 2] if n else None
 
+
 def main(args=None):
     rclpy.init(args=args)
 
@@ -405,9 +412,6 @@ def main(args=None):
             control_system.get_logger().error(str(control_system.airmar_data["pitchroll"]["roll"]))
             control_system.update_winds(control_system.airmar_data["apparentWind"]["direction"])
             control_system.ballast_alg_active()
-
-
-
 
             # # Control Trim Tab
             # if "wind-angle-relative" in control_system.airmar_data:
