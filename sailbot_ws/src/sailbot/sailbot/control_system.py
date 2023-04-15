@@ -82,7 +82,8 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         self.windDir = self.wind / np.linalg.norm(self.wind)  # normalize the wind vector
 
         # need to feed new values
-        self.goal = np.array([0, 0])  # goal position
+        # test for
+        self.goal = np.array([0,0])  # goal position
 
         # information stored on the boat's current heading
         self.onAB = False  # whether the boat is currently trying to sail a course on either side of the no-go zone
@@ -426,18 +427,24 @@ def main(args=None):
                 control_system.update_winds(control_system.airmar_data["apparentWind"]["direction"])
                 control_system.ballast_alg_active()
 
-            # code to Control the  Trim Tab
-            if "apparentWind" in control_system.airmar_data and "direction" in control_system.airmar_data["apparentWind"]:
-                try:
-                    control_system.find_trim_tab_state(control_system.airmar_data["apparentWind"]["direction"])
-                except Exception as e:
-                    control_system.get_logger().error(str(e))
-            else:
-                control_system.get_logger().info("No wind angle values")
+            # # code to Control the  Trim Tab
+            # if "apparentWind" in control_system.airmar_data and "direction" in control_system.airmar_data["apparentWind"]:
+            #     try:
+            #         control_system.find_trim_tab_state(control_system.airmar_data["apparentWind"]["direction"])
+            #     except Exception as e:
+            #         control_system.get_logger().error(str(e))
+            # else:
+            #     control_system.get_logger().info("No wind angle values")
 
             # code to control the rudders (aka nav alg stuff)
             if "Latitude" in control_system.airmar_data and "Longitude" in control_system.airmar_data:
                 control_system.boat = np.array([control_system.airmar_data["Latitude"], control_system.airmar_data["Longitude"]])
+
+                user_input_lat = input('Enter a latitude value: ')
+                user_input_long = input('Enter a longitude value: ')
+                user_input_lat_float = float(user_input_lat)
+                user_input_long_float = float(user_input_long)
+                control_system.goal = np.array([user_input_lat_float,user_input_long_float])
 
                 if "apparentWind" in control_system.airmar_data and "direction" in control_system.airmar_data["apparentWind"]:
                     curr_wind_value = control_system.update_winds(
