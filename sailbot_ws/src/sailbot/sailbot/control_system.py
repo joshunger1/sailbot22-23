@@ -427,7 +427,7 @@ def main(args=None):
                 control_system.ballast_alg_active()
 
             # code to Control the  Trim Tab
-            if control_system.airmar_data["apparentWind"]["direction"]:
+            if "apparentWind" in control_system.airmar_data and "direction" in control_system.airmar_data["apparentWind"]:
                 try:
                     control_system.find_trim_tab_state(control_system.airmar_data["apparentWind"]["direction"])
                 except Exception as e:
@@ -436,10 +436,10 @@ def main(args=None):
                 control_system.get_logger().info("No wind angle values")
 
             # code to control the rudders (aka nav alg stuff)
-            if control_system.airmar_data["Latitude"] and control_system.airmar_data["Longitude"]:
+            if "Latitude" in control_system.airmar_data and "Longitude" in control_system.airmar_data:
                 control_system.boat = np.array([control_system.airmar_data["Latitude"], control_system.airmar_data["Longitude"]])
 
-                if control_system.airmar_data["apparentWind"]["direction"]:
+                if "apparentWind" in control_system.airmar_data and "direction" in control_system.airmar_data["apparentWind"]:
                     curr_wind_value = control_system.update_winds(
                         control_system.airmar_data["apparentWind"]["direction"])
                     curr_heading_value = float(control_system.airmar_data["currentHeading"])
