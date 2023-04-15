@@ -438,8 +438,10 @@ def main(args=None):
 
             # code to control the rudders (aka nav alg stuff)
 
-            if "Latitude" in control_system.airmar_data and "Longitude" in control_system.airmar_data:
-                control_system.boat = np.array([control_system.airmar_data["Latitude"], control_system.airmar_data["Longitude"]])
+            # if "Latitude" in control_system.airmar_data and "Longitude" in control_system.airmar_data:
+            #     control_system.boat = np.array([control_system.airmar_data["Latitude"], control_system.airmar_data["Longitude"]])
+            if True:
+                control_system.boat = np.array([42.273752, -71.805981])
 
                 if "apparentWind" in control_system.airmar_data and "direction" in control_system.airmar_data["apparentWind"]:
                     curr_wind_value = control_system.update_winds(
@@ -471,8 +473,8 @@ def main(args=None):
                         control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
                 else:
                     control_system.get_logger().error("No Wind Data")
-            else:
-                control_system.get_logger().error("No GPS Data")
+            # else:
+            #     control_system.get_logger().error("No GPS Data")
 
 
 
