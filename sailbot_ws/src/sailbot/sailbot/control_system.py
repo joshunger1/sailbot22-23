@@ -126,9 +126,9 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         self.get_logger().error("within ballast alg")
 
         if self.port_roll:  # if we are leaning port
-            roll_error = 20 + float(self.airmar_data["pitchroll"]["roll"])  # -20 is our desired goal
+            roll_error = 25 + float(self.airmar_data["pitchroll"]["roll"])  # -20 is our desired goal
         else:  # if we are leaning starboard
-            roll_error = -20 + float(self.airmar_data["pitchroll"]["roll"])  # 20 is our desired goal
+            roll_error = -25 + float(self.airmar_data["pitchroll"]["roll"])  # 20 is our desired goal
 
         # make more efficient with rolling overwrite # used in integral error and derivative error
         # prevErrors[4] = prevErrors[3]
@@ -154,17 +154,20 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
             ballast_speed += (error_sum * 1.75)  # the max error_sum value can be is ~20, so this means the max
             # speed can be approximately at 60 (or 130)
 
+            # this is to ensure the rail will not go off the edge
             if (self.ballast_adc_value > 0.25) and ballast_speed > 95:
                 self.get_logger().error("trying to move")
                 ballast_json = {"channel": "12", "angle": ballast_speed}  # create a json file to send to the motor
                 self.pwm_control_publisher_.publish(self.make_json_string(ballast_json))  # publish the json
                 return
 
+            # this is to ensure the rail will not go off the edge
             if (self.ballast_adc_value < 0.75) and ballast_speed < 95:
                 self.get_logger().error("trying to move")
                 ballast_json = {"channel": "12", "angle": ballast_speed}  # create a json file to send to the motor
                 self.pwm_control_publisher_.publish(self.make_json_string(ballast_json))  # publish the json
                 return
+
             # ...otherwise, if we want the ballast to stay still:
             else:
                 self.get_logger().error("staying in middle")
@@ -284,9 +287,9 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         self.get_logger().info("you shouldn't be seeing this")
         return np.array(1, 1)
 
-    def unit_circle_to_heading(self, x, y):
+    def unit_circle_to_heading_gps(self,x, y):
         """Convert unit circle (x, y) coordinates to heading angle in degrees."""
-        angle = math.degrees(math.atan2(y, x))
+        angle = -math.degrees(math.atan2(y, x)) + 90
         return angle + 360 if angle < 0 else angle
 
     def serial_rc_listener_callback(self, msg):
@@ -370,7 +373,7 @@ def main(args=None):
         if len(control_system.serial_rc) < 2:
             pass  # Don't have rc values
         elif float(control_system.serial_rc["state2"]) > 600:  # in RC
-            control_system.get_logger().info("Currently in RC")
+            control_system.get_logger().error("Currently in RC")
 
             if float(control_system.serial_rc["state1"]) < 400:
                 # Manual
@@ -399,6 +402,7 @@ def main(args=None):
                 ballast_json = {"channel": "12", "angle": ballast_angle}
                 control_system.pwm_control_publisher_.publish(control_system.make_json_string(ballast_json))
             else:
+                control_system.update_winds(control_system.airmar_data["apparentWind"]["direction"])
                 control_system.ballast_alg_active()
             rudder_angle = (float(control_system.serial_rc["rudder"]) / 2000 * 90) + 25
             rudder_json = {"channel": "8", "angle": rudder_angle}
@@ -407,122 +411,68 @@ def main(args=None):
         elif float(control_system.serial_rc["state2"]) < 600:
             control_system.get_logger().error("Currently in AUTONOMOUS")
 
-            # ballast_adc_val = control_system.ballast_adc_value  # get the saved value
-            # control_system.get_logger().error(f"Ballast ADC value: {str(ballast_adc_val)}")
-            control_system.get_logger().error(str(control_system.airmar_data["pitchroll"]["roll"]))
-            control_system.update_winds(control_system.airmar_data["apparentWind"]["direction"])
-            control_system.ballast_alg_active()
+            # code to control ballast
+            if float(control_system.serial_rc["state1"]) < 800:
+                ballast_angle = 0
+                if control_system.serial_rc["ballast"] > 1200:
+                    if control_system.ballast_adc_value > 0.25:
+                        ballast_angle = 130
+                elif control_system.serial_rc["ballast"] < 800:
+                    if control_system.ballast_adc_value < 0.75:
+                        ballast_angle = 60
+                ballast_json = {"channel": "12", "angle": ballast_angle}
+                control_system.pwm_control_publisher_.publish(control_system.make_json_string(ballast_json))
+            else:
+                control_system.update_winds(control_system.airmar_data["apparentWind"]["direction"])
+                control_system.ballast_alg_active()
 
-            # # Control Trim Tab
-            # if "wind-angle-relative" in control_system.airmar_data:
-            #     try:
-            #         control_system.find_trim_tab_state(control_system.airmar_data["apparentWind"]["direction"])
-            #     except Exception as e:
-            #         control_system.get_logger().error(str(e))
-            # else:
-            #     control_system.get_logger().info("No wind angle values")
-            #
-            # if control_system.airmar_data["Latitude"] or control_system.airmar_data["Longitude"]:
-            #     control_system.boat = np.array([control_system.airmar_data["Latitude"], control_system.airmar_data["Longitude"]])
-            # else:
-            #     control_system.get_logger().error("No GPS Data")
-            #
-            # curr_wind_value = control_system.update_winds(control_system.airmar_data["apparentWind"]["direction"])
-            # curr_heading_value = float(control_system.airmar_data["currentHeading"])
-            # true_wind_value = (curr_wind_value + curr_heading_value) % 360
-            # wind_cos = math.cos(-true_wind_value)
-            # wind_sin = math.sin(-true_wind_value)
-            #
-            # control_system.wind = np.array([wind_sin, wind_cos])
-            #
-            # desiredHeading = control_system.calc_heading()
+            # code to Control the  Trim Tab
+            if "wind-angle-relative" in control_system.airmar_data:
+                try:
+                    control_system.find_trim_tab_state(control_system.airmar_data["apparentWind"]["direction"])
+                except Exception as e:
+                    control_system.get_logger().error(str(e))
+            else:
+                control_system.get_logger().info("No wind angle values")
 
-            # # Attempting to read airmar data
-            # control_system.get_logger().error("Current Heading: " + control_system.airmar_data["currentHeading"])
-            # control_system.get_logger().error("Magnetic Deviation: " + control_system.airmar_data["magnetic-deviation"])
-            # control_system.get_logger().error("Magnetic Variation: " + control_system.airmar_data["magnetic-variation"])
-            # control_system.get_logger().error("Track Degrees True: " + control_system.airmar_data["track-degrees-true"])
-            # control_system.get_logger().error(
-            #     "Track Degrees Magnetic: " + control_system.airmar_data["track-degrees-magnetic"])
-            # control_system.get_logger().error("Pitch: " + control_system.airmar_data["pitchroll"]["pitch"])
-            # control_system.get_logger().error("Roll: " + control_system.airmar_data["pitchroll"]["roll"])
-            # # control_system.get_logger().error("Lat: " + control_system.airmar_data["Latitude"])
-            # # control_system.get_logger().error("Lat-Dir: " + control_system.airmar_data["Latitude-direction"])
-            # # control_system.get_logger().error("Long: " + control_system.airmar_data["Longitude"])
-            # # control_system.get_logger().error("Long-Dir: " + control_system.airmar_data["Longitude-direction"])
-            # control_system.get_logger().error(
-            #     "Apparent Wind Speed: " + control_system.airmar_data["apparentWind"]["speed"])
-            # control_system.get_logger().error(
-            #     "Apparent Wind Direction: " + control_system.airmar_data["apparentWind"]["direction"])
+            # code to control the rudders (aka nav alg stuff)
+            if control_system.airmar_data["Latitude"] and control_system.airmar_data["Longitude"]:
+                control_system.boat = np.array([control_system.airmar_data["Latitude"], control_system.airmar_data["Longitude"]])
 
-            # TESTING TRIM TAB
+                if control_system.airmar_data["apparentWind"]["direction"]:
+                    curr_wind_value = control_system.update_winds(
+                        control_system.airmar_data["apparentWind"]["direction"])
+                    curr_heading_value = float(control_system.airmar_data["currentHeading"])
+                    true_wind_value = (curr_wind_value + curr_heading_value) % 360
+                    wind_cos = math.cos(-true_wind_value)
+                    wind_sin = math.sin(-true_wind_value)
 
-            # start_time = time.time()  # Get the current time
-            # while time.time() - start_time < 40:  # Run the loop for 40 seconds
-            #     current_time = time.time()  # Get the current time in each iteration
-            #     switch_case = int(current_time - start_time) % 4  # Determine which switch case to execute
-            #
-            #     # Execute the switch case
-            #     if switch_case == 0:
-            #         control_system.get_logger().error("max lift port")
-            #         # begin max lift port
-            #         state_msg.data = 0
-            #         control_system.trim_tab_control_publisher_.publish(state_msg)
-            #     elif switch_case == 1:
-            #         control_system.get_logger().error("max lift starboard")
-            #         # begin max lift starboard
-            #         state_msg.data = 1
-            #         control_system.trim_tab_control_publisher_.publish(state_msg)
-            #     elif switch_case == 2:
-            #         control_system.get_logger().error("max drag port")
-            #         # begin max drag port
-            #         state_msg.data = 2
-            #         control_system.trim_tab_control_publisher_.publish(state_msg)
-            #     else:
-            #         control_system.get_logger().error("max drag starboard")
-            #         # begin max drag starboard
-            #         state_msg.data = 3
-            #         control_system.trim_tab_control_publisher_.publish(state_msg)
-            #
-            #     # Wait for the remaining time to ensure that each switch case runs for 10 seconds
-            #     remaining_time = 10 - (time.time() - current_time)
-            #     if remaining_time > 0:
-            #         time.sleep(remaining_time)
+                    control_system.wind = np.array([wind_sin, wind_cos])
 
-            # MIN AND MAX FOR RUDDER IS 106.495 AND 32.92
+                    # get the desired heading
+                    desired_heading_cartesian = control_system.calc_heading()
 
-            # start_time = time.time()  # Get the current time
-            # while time.time() - start_time < 10:  # Keep looping until 10 seconds have passed
-            #     for i in range(int(106.495 * 100), int(32.92 * 100) - 1, -1):
-            #         num = i / 100
-            #         rudder_json = {"channel": "8", "angle": float(num)}
-            #         control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
+                    # convert to polar
+                    final_desired_heading = control_system.unit_circle_to_heading_gps(desired_heading_cartesian[0],desired_heading_cartesian[1])
 
-            # destinations = [(42.277055,-71.799924),(42.276692,-71.799912)]
-            # if 'Latitude' in control_system.airmar_data and 'Longitude' in control_system.airmar_data:
-            #     try:
-            #         if control_system.p2p_alg is None:  # Instantiate new
-            #             control_system.p2p_alg = p2p.P2P((float(control_system.airmar_data['Latitude']), float(control_system.airmar_data['Longitude'])), destinations[0])
-            #         wind = control_system.update_winds(control_system.airmar_data["apparentWind"]["direction"])
-            #         action = control_system.p2p_alg.getAction(wind, float(control_system.airmar_data["magnetic-sensor-heading"]), float(control_system.airmar_data["track-degrees-true"]))
-            #         control_system.get_logger().error(str(control_system.p2p_alg.getdistance()))
-            #         control_system.get_logger().error(str(action))
-            #         if action['status'] == 'DONE':
-            #             if control_system.p2p_alg.dest == destinations[0]:
-            #                 control_system.p2p_alg = p2p.P2P((control_system.airmar_data['Latitude'], control_system.airmar_data['Longitude']), destinations[1])
-            #             else:
-            #                 control_system.p2p_alg = p2p.P2P((control_system.airmar_data['Latitude'], control_system.airmar_data['Longitude']), destinations[0])
-            #         else:  # We have a non-done action (either trim tab or rudders)
-            #             if 'tt-state' in action:
-            #                 control_system.trim_tab_control_publisher_.publish(int(action['tt-state']))
-            #             elif 'rudder-angle' in action:
-            #                 rudder_json = {"channel": "8", "angle": int(action['rudder-angle'])}
-            #                 control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
-            #             control_system.ballast_algorithm()
-            #     except Exception as e:
-            #         control_system.get_logger().error(str(e))
-            # else:
-            #     control_system.get_logger().error("No latitude and longitude data")
+                    # check if we are currently offset from the desired heading
+                    if final_desired_heading > control_system.airmar_data["currentHeading"]:
+                        rudder_json = {"channel": "8", "angle": 50}
+                        control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
+
+                    elif final_desired_heading > control_system.airmar_data["currentHeading"]:
+                        rudder_json = {"channel": "8", "angle": 84}
+                        control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
+
+                    else:
+                        rudder_json = {"channel": "8", "angle": 67}
+                        control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
+                else:
+                    control_system.get_logger().error("No Wind Data")
+            else:
+                control_system.get_logger().error("No GPS Data")
+
+
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
