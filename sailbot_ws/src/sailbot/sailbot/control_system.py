@@ -458,6 +458,7 @@ def main(args=None):
 
                     # convert to polar
                     final_desired_heading = control_system.unit_circle_to_heading_gps(desired_heading_cartesian[0],desired_heading_cartesian[1])
+                    control_system.get_logger().error(str(final_desired_heading))
 
                     # check if we are currently offset from the desired heading
                     if final_desired_heading > float(control_system.airmar_data["currentHeading"]):
