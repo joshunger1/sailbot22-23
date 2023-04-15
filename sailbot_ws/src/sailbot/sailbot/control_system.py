@@ -427,7 +427,7 @@ def main(args=None):
                 control_system.ballast_alg_active()
 
             # code to Control the  Trim Tab
-            if "wind-angle-relative" in control_system.airmar_data:
+            if control_system.airmar_data["apparentWind"]["direction"]:
                 try:
                     control_system.find_trim_tab_state(control_system.airmar_data["apparentWind"]["direction"])
                 except Exception as e:
