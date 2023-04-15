@@ -192,13 +192,13 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
 
         Dp = np.dot(BG, self.windDir)
 
-        self.get_logger().info("dot product of direction to goal and the wind is:")
-        self.get_logger().info(str(Dp))
+        self.get_logger().error("dot product of direction to goal and the wind is:")
+        self.get_logger().error(str(Dp))
 
         if Dp > self.dp_min:
             # if current Dp is less than Dpmin, we can sail directly at the goal. Easy-peasy!
 
-            self.get_logger().info("trying to sail directly at the goal")
+            self.get_logger().error("trying to sail directly at the goal")
 
             self.onAB = False  # we are NOT sailing on the edge of the no-go zone if we sail directly at the goal
             return BG  # return desired heading
@@ -208,7 +208,7 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
             # an upwind course that's not directly at the goal, we'd like to continue on that course unless our
             # crosstrack error is too high
 
-            self.get_logger().info("we cannot sail directly at the goal - calculating best heading")
+            self.get_logger().error("we cannot sail directly at the goal - calculating best heading")
 
             # checking if our cross-track error is too high requires knowing the vectors A and B, so we'll start with
             # that: A and B are the vectors that lie on the edge of the no-go zone, so we'll just rotate the upwind
@@ -249,14 +249,14 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
 
                 cte_threshold = np.cos(self.minSailingAngle - np.arcsin(self.max_cte / np.linalg.norm(BGraw)))
 
-                self.get_logger().info("cte_threshold is:")
-                self.get_logger().info(str(cte_threshold))
+                self.get_logger().error("cte_threshold is:")
+                self.get_logger().error(str(cte_threshold))
 
-                self.get_logger().info("A dot BG is:")
-                self.get_logger().info(str(ADBG))
+                self.get_logger().error("A dot BG is:")
+                self.get_logger().error(str(ADBG))
 
-                self.get_logger().info("B dot BG is:")
-                self.get_logger().info(str(BDBG))
+                self.get_logger().error("B dot BG is:")
+                self.get_logger().error(str(BDBG))
 
                 if BDBG > cte_threshold:
                     self.onAB = True
@@ -285,7 +285,7 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
                     return B
 
         # this should not ever return
-        self.get_logger().info("you shouldn't be seeing this")
+        self.get_logger().error("you shouldn't be seeing this")
         return np.array(1, 1)
 
     def unit_circle_to_heading_gps(self,x, y):
