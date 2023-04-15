@@ -78,7 +78,7 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
 
         # autonomous global variables, position and velocity of objects
         self.boat = np.array([0, 0])  # boat position
-        self.wind = np.array([0, 0])  # wind in x and y velocity (m/s)
+        self.wind = np.array([1, 0])  # wind in x and y velocity (m/s)
         self.windDir = self.wind / np.linalg.norm(self.wind)  # normalize the wind vector
 
         # need to feed new values
