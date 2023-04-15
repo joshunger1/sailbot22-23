@@ -83,7 +83,7 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
 
         # need to feed new values
         # test for
-        self.goal = np.array([0,0])  # goal position
+        self.goal = np.array([42.274869, -71.805275])  # goal position
 
         # information stored on the boat's current heading
         self.onAB = False  # whether the boat is currently trying to sail a course on either side of the no-go zone
@@ -437,20 +437,9 @@ def main(args=None):
             #     control_system.get_logger().info("No wind angle values")
 
             # code to control the rudders (aka nav alg stuff)
-            user_input_lat = input('Enter a latitude value: ')
-            user_input_long = input('Enter a longitude value: ')
-            user_input_lat_float = float(user_input_lat)
-            user_input_long_float = float(user_input_long)
-            control_system.goal = np.array([user_input_lat_float, user_input_long_float])
 
             if "Latitude" in control_system.airmar_data and "Longitude" in control_system.airmar_data:
                 control_system.boat = np.array([control_system.airmar_data["Latitude"], control_system.airmar_data["Longitude"]])
-
-                user_input_lat = input('Enter a latitude value: ')
-                user_input_long = input('Enter a longitude value: ')
-                user_input_lat_float = float(user_input_lat)
-                user_input_long_float = float(user_input_long)
-                control_system.goal = np.array([user_input_lat_float,user_input_long_float])
 
                 if "apparentWind" in control_system.airmar_data and "direction" in control_system.airmar_data["apparentWind"]:
                     curr_wind_value = control_system.update_winds(
