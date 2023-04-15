@@ -461,11 +461,11 @@ def main(args=None):
                     control_system.get_logger().error(str(final_desired_heading))
 
                     # check if we are currently offset from the desired heading
-                    if final_desired_heading > float(control_system.airmar_data["currentHeading"]):
+                    if final_desired_heading - 5 > float(control_system.airmar_data["currentHeading"]):
                         rudder_json = {"channel": "8", "angle": 50}
                         control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
 
-                    elif final_desired_heading < float(control_system.airmar_data["currentHeading"]):
+                    elif final_desired_heading + 5 < float(control_system.airmar_data["currentHeading"]):
                         rudder_json = {"channel": "8", "angle": 84}
                         control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
 
