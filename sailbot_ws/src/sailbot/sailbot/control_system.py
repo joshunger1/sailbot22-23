@@ -193,7 +193,7 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         Dp = np.dot(BG, self.windDir)
 
         self.get_logger().info("dot product of direction to goal and the wind is:")
-        self.get_logger().info(Dp)
+        self.get_logger().info(str(Dp))
 
         if Dp > self.dp_min:
             # if current Dp is less than Dpmin, we can sail directly at the goal. Easy-peasy!
@@ -250,13 +250,13 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
                 cte_threshold = np.cos(self.minSailingAngle - np.arcsin(self.max_cte / np.linalg.norm(BGraw)))
 
                 self.get_logger().info("cte_threshold is:")
-                self.get_logger().info(cte_threshold)
+                self.get_logger().info(str(cte_threshold))
 
                 self.get_logger().info("A dot BG is:")
-                self.get_logger().info(ADBG)
+                self.get_logger().info(str(ADBG))
 
                 self.get_logger().info("B dot BG is:")
-                self.get_logger().info(BDBG)
+                self.get_logger().info(str(BDBG))
 
                 if BDBG > cte_threshold:
                     self.onAB = True
