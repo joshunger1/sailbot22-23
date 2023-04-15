@@ -437,6 +437,12 @@ def main(args=None):
             #     control_system.get_logger().info("No wind angle values")
 
             # code to control the rudders (aka nav alg stuff)
+            user_input_lat = input('Enter a latitude value: ')
+            user_input_long = input('Enter a longitude value: ')
+            user_input_lat_float = float(user_input_lat)
+            user_input_long_float = float(user_input_long)
+            control_system.goal = np.array([user_input_lat_float, user_input_long_float])
+
             if "Latitude" in control_system.airmar_data and "Longitude" in control_system.airmar_data:
                 control_system.boat = np.array([control_system.airmar_data["Latitude"], control_system.airmar_data["Longitude"]])
 
