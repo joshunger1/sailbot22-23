@@ -42,5 +42,10 @@ def generate_launch_description():
             package='sailbot',
             node_executable='ballast_adc',
             name='ballast_adc'
+        ),
+        Node(
+            package='sailbot',
+            node_executable='computer_vision',
+            name='computer_vision'
         )
     ])
