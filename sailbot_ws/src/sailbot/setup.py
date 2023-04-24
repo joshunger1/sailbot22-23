@@ -29,6 +29,7 @@ setup(
             'debug_interface = sailbot.debug_interface:main',
             'battery_monitor = sailbot.batteryMonitor:main',
             'ballast_adc = sailbot.ballast_adc:main',
+            'computer_vision = sailbot.blob_detection:main',
         ],
     },
 )
