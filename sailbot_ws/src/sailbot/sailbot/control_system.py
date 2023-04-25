@@ -51,7 +51,7 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
 
         self.cv_subscription = self.create_subscription(
             Float32,
-            'object_detected',
+            'neon_orange_detected',
             self.cv_listener_callback,
             10)
         self.cv_subscription
