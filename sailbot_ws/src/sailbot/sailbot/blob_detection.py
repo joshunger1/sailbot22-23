@@ -16,7 +16,7 @@ class NeonOrangeDetector(Node):
         self.min_area = 7500
 
         # Open the default camera
-        self.cap = cv2.VideoCapture("/dev/video0")
+        cap = cv2.VideoCapture("v4l2src device=/dev/video0 ! video/x-raw, width=640, height=480 ! videoconvert ! appsink")
 
         # Set the resolution of the camera
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)

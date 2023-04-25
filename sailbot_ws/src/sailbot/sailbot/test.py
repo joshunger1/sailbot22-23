@@ -12,7 +12,8 @@ orange_upper = (20, 255, 255)
 min_area = 7500
 
 # Open the default camera
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture("v4l2src device=/dev/video0 ! video/x-raw, width=640, height=480 ! videoconvert ! appsink")
+
 
 # Set the resolution of the camera
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
