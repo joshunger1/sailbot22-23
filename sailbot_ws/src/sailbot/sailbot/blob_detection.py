@@ -9,8 +9,8 @@ class NeonOrangeDetector(Node):
         self.publisher_ = self.create_publisher(Int32, "neon_orange_detected", 10)
 
         # Define the lower and upper bounds of the neon orange color in HSV format
-        self.orange_lower = (9, 191, 127)
-        self.orange_upper = (24, 235, 255)
+        self.orange_lower = (5, 90, 80)
+        self.orange_upper = (20, 255, 255)
 
         # Set the minimum area requirement for an object to be considered
         self.min_area = 1500
