@@ -1,17 +1,12 @@
 import rclpy
 from rclpy.node import Node
-from sensor_msgs.msg import Image
-from std_msgs.msg import Int8
+from std_msgs.msg import Int32
 import cv2
-import numpy as np
 
-class OrangeBlobDetector(Node):
-
+class NeonOrangeDetector(Node):
     def __init__(self):
-        super().__init__('orange_blob_detector')
-        self.publisher_ = self.create_publisher(Int8, 'object_detected', 10)
-        self.subscription_ = self.create_subscription(Image, 'camera/image_raw', self.detect_orange_blob, 10)
-        self.subscription_  # prevent unused variable warning
+        super().__init__("computer_vision")
+        self.publisher_ = self.create_publisher(Int32, "neon_orange_detected", 10)
 
         # Define the lower and upper bounds of the neon orange color in HSV format
         self.orange_lower = (0, 90, 80)
@@ -20,9 +15,6 @@ class OrangeBlobDetector(Node):
         # Set the minimum area requirement for an object to be considered
         self.min_area = 7500
 
-        # Create a window to display the camera view and the neon orange blob detection with a bounding box
-        cv2.namedWindow('Camera View and Neon Orange Blob Detection', cv2.WINDOW_NORMAL)
-
         # Open the default camera
         self.cap = cv2.VideoCapture("/dev/video0")
 
@@ -30,9 +22,11 @@ class OrangeBlobDetector(Node):
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
-    def detect_orange_blob(self, msg):
-        # Convert the ROS image message to an OpenCV image
-        frame = np.frombuffer(msg.data, dtype=np.uint8).reshape(msg.height, msg.width, -1)
+        self.timer_ = self.create_timer(0.01, self.detect_orange)
+
+    def detect_orange(self):
+        # Read a frame from the camera
+        ret, frame = self.cap.read()
 
         # Convert the frame to the HSV color space
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -50,29 +44,24 @@ class OrangeBlobDetector(Node):
             if area > self.min_area:
                 x, y, w, h = cv2.boundingRect(largest_contour)
                 cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-                # Publish a message indicating that an object was detected
-                self.publisher_.publish(Int8(data=1))
-            else:
-                # Publish a message indicating that no object was detected
-                self.publisher_.publish(Int8(data=0))
-        else:
-            # Publish a message indicating that no object was detected
-            self.publisher_.publish(Int8(data=0))
+                self.publisher_.publish(Int32(data=1))
+                return
 
-        # Display the camera view and the neon orange blob detection with a bounding box
-        cv2.imshow('Camera View and Neon Orange Blob Detection', frame)
-        cv2.waitKey(1)
+        # No object detected
+        self.publisher_.publish(Int32(data=0))
 
     def __del__(self):
         # Release the camera and close the window
         self.cap.release()
         cv2.destroyAllWindows()
 
+
 def main(args=None):
     rclpy.init(args=args)
+    neon_orange_detector = NeonOrangeDetector()
+    rclpy.spin(neon_orange_detector)
+    neon_orange_detector.destroy_node()
+    rclpy.shutdown()
 
-    orange_blob_detector = OrangeBlobDetector()
-
-    rclpy.spin(orange_blob_detector)
-
-    orange
+if __name__ == '__main__':
+    main()
