@@ -5,6 +5,7 @@ import time
 import smbus
 import math
 
+
 class BallastADC(Node):
     def __init__(self):
         super(BallastADC, self).__init__('ballast_adc')
@@ -20,68 +21,63 @@ class BallastADC(Node):
         timer_period = 0.5  # Fetch data every 1 second
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
-	#some MPU6050 Registers and their Address
-        self.Register_A     = 0              #Address of Configuration register A
-        self.Register_B     = 0x01           #Address of configuration register B
-        self.Register_mode  = 0x02           #Address of mode register
+        # some MPU6050 Registers and their Address
+        self.Register_A = 0  # Address of Configuration register A
+        self.Register_B = 0x01  # Address of configuration register B
+        self.Register_mode = 0x02  # Address of mode register
 
-        self.X_axis_H    = 0x03              #Address of X-axis MSB data register
-        self.Z_axis_H    = 0x05              #Address of Z-axis MSB data register
-        self.Y_axis_H    = 0x07              #Address of Y-axis MSB data register
-        self.declination = -0.00669          #define declination angle of location where measurement going to be done
-        self.pi          = 3.14159265359     #define pi value
-        self.Device_Address = 0x1e   # HMC5883L magnetometer device address
-
+        self.X_axis_H = 0x03  # Address of X-axis MSB data register
+        self.Z_axis_H = 0x05  # Address of Z-axis MSB data register
+        self.Y_axis_H = 0x07  # Address of Y-axis MSB data register
+        self.declination = -0.00669  # define declination angle of location where measurement going to be done
+        self.pi = 3.14159265359  # define pi value
+        self.Device_Address = 0x1e  # HMC5883L magnetometer device address
 
     def calcHeading(self):
-        bus = smbus.SMBus(1) 	# or bus = smbus.SMBus(0) for older version boards
+        self.Magnetometer_Init()  # initialize HMC5883L magnetometer
 
-        self.Magnetometer_Init()     # initialize HMC5883L magnetometer
-	
-        #Read Accelerometer raw value
+        # Read Accelerometer raw value
         x = self.read_raw_data(self.X_axis_H)
         z = self.read_raw_data(self.Z_axis_H)
         y = self.read_raw_data(self.Y_axis_H)
 
         heading = math.atan2(y, x) + self.declination
-        
-        #Due to declination check for >360 degree
-        if(heading > 2*self.pi):
-                heading = heading - 2*self.pi
 
-        #check for sign
-        if(heading < 0):
-                heading = heading + 2*self.pi
+        # Due to declination check for >360 degree
+        if (heading > 2 * self.pi):
+            heading = heading - 2 * self.pi
 
-        #convert into angle
-        heading_angle = heading * 180/self.pi
+        # check for sign
+        if (heading < 0):
+            heading = heading + 2 * self.pi
+
+        # convert into angle
+        heading_angle = heading * 180 / self.pi
         my_float_msg = Float32()
         my_float_msg.data = heading_angle
         self.ballast_adc_publisher.publish(my_float_msg)
 
-
     def read_raw_data(self, addr):
-        #Read raw 16-bit value
+        # Read raw 16-bit value
         high = self.bus.read_byte_data(self.Device_Address, addr)
-        low = self.bus.read_byte_data(self.Device_Address, addr+1)
+        low = self.bus.read_byte_data(self.Device_Address, addr + 1)
 
-        #concatenate higher and lower value
+        # concatenate higher and lower value
         value = ((high << 8) | low)
 
-        #to get signed value from module
-        if(value > 32768):
+        # to get signed value from module
+        if (value > 32768):
             value = value - 65536
         return value
 
-
     def Magnetometer_Init(self):
-        #write to Configuration Register A
+        # write to Configuration Register A
         self.bus.write_byte_data(self.Device_Address, self.Register_A, 0x70)
 
-        #Write to Configuration Register B for gain
+        # Write to Configuration Register B for gain
         self.bus.write_byte_data(self.Device_Address, self.Register_B, 0xa0)
 
-        #Write to mode Register for selecting mode
+        # Write to mode Register for selecting mode
         self.bus.write_byte_data(self.Device_Address, self.Register_mode, 0)
 
     def timer_callback(self):
@@ -106,7 +102,7 @@ class BallastADC(Node):
 
         feedback_voltage = reading1 * 6.144 / 32767.0
         supply_voltage = reading2 * 6.144 / 32767.0
-        relative_position = feedback_voltage/supply_voltage
+        relative_position = feedback_voltage / supply_voltage
         my_float_msg = Float32()
         my_float_msg.data = relative_position
         self.ballast_adc_publisher.publish(my_float_msg)
