@@ -400,6 +400,11 @@ def main(args=None):
         elif float(control_system.serial_rc["state2"]) > 600:  # in RC
             control_system.get_logger().error("Currently in RC")
 
+            control_system.get_logger().error("cv value: " + str(control_system.cv))
+            if control_system.cv == 1:
+                rudder_json = {"channel": "8", "angle": 106}
+                control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
+
             if float(control_system.serial_rc["state1"]) < 400:
                 # Manual
                 manual_angle = int((float(control_system.serial_rc["manual"]) / 2000) * 100) + 65
@@ -436,10 +441,6 @@ def main(args=None):
         elif float(control_system.serial_rc["state2"]) < 600:
             control_system.get_logger().error("Currently in AUTONOMOUS")
 
-            control_system.get_logger().error("cv value: " + str(control_system.cv))
-            if control_system.cv == 1:
-                rudder_json = {"channel": "8", "angle": 106}
-                control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
 
             # code to control ballast
             if float(control_system.serial_rc["state1"]) < 800:
