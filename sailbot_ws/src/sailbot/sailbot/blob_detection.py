@@ -51,6 +51,7 @@ class NeonOrangeDetector(Node):
         # No object detected
         self.publisher_.publish(Int32(data=0))
         self.get_logger().error("did not find a buoy")
+        cv2.imshow("neon orange detection", frame)
 
     def __del__(self):
         # Release the camera and close the window
@@ -61,8 +62,9 @@ class NeonOrangeDetector(Node):
 def main(args=None):
     rclpy.init(args=args)
     neon_orange_detector = NeonOrangeDetector()
-    neon_orange_detector.get_logger().error("poo")
-    rclpy.spin(neon_orange_detector)
+    while rclpy.ok():
+        rclpy.spin_once(neon_orange_detector)
+        cv2.waitKey(1)
     neon_orange_detector.destroy_node()
     rclpy.shutdown()
 
