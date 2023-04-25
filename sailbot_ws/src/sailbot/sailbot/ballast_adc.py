@@ -30,18 +30,18 @@ class BallastADC(Node):
         self.Y_axis_H    = 0x07              #Address of Y-axis MSB data register
         self.declination = -0.00669          #define declination angle of location where measurement going to be done
         self.pi          = 3.14159265359     #define pi value
+        self.Device_Address = 0x1e   # HMC5883L magnetometer device address
 
 
     def calcHeading(self):
         bus = smbus.SMBus(1) 	# or bus = smbus.SMBus(0) for older version boards
-        Device_Address = 0x1e   # HMC5883L magnetometer device address
 
-        Magnetometer_Init()     # initialize HMC5883L magnetometer 
+        self.Magnetometer_Init()     # initialize HMC5883L magnetometer
 	
         #Read Accelerometer raw value
-        x = read_raw_data(self.X_axis_H)
-        z = read_raw_data(self.Z_axis_H)
-        y = read_raw_data(self.Y_axis_H)
+        x = self.read_raw_data(self.X_axis_H)
+        z = self.read_raw_data(self.Z_axis_H)
+        y = self.read_raw_data(self.Y_axis_H)
 
         heading = math.atan2(y, x) + self.declination
         
@@ -62,8 +62,8 @@ class BallastADC(Node):
 
     def read_raw_data(self, addr):
         #Read raw 16-bit value
-        high = bus.read_byte_data(Device_Address, addr)
-        low = bus.read_byte_data(Device_Address, addr+1)
+        high = self.bus.read_byte_data(self.Device_Address, addr)
+        low = self.bus.read_byte_data(self.Device_Address, addr+1)
 
         #concatenate higher and lower value
         value = ((high << 8) | low)
@@ -76,16 +76,17 @@ class BallastADC(Node):
 
     def Magnetometer_Init(self):
         #write to Configuration Register A
-        self.bus.write_byte_data(Device_Address, self.Register_A, 0x70)
+        self.bus.write_byte_data(self.Device_Address, self.Register_A, 0x70)
 
         #Write to Configuration Register B for gain
-        self.bus.write_byte_data(Device_Address, self.Register_B, 0xa0)
+        self.bus.write_byte_data(self.Device_Address, self.Register_B, 0xa0)
 
         #Write to mode Register for selecting mode
-        self.bus.write_byte_data(Device_Address, self.Register_mode, 0)
+        self.bus.write_byte_data(self.Device_Address, self.Register_mode, 0)
 
     def timer_callback(self):
         self.calcADC()
+        self.calcHeading()
 
     def calcADC(self):
         config = [0x40, 0x83]
