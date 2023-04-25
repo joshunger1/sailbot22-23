@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
 import json
-from std_msgs.msg import String, Float32, Int8, Int16
+from std_msgs.msg import String, Float32, Int8, Int16, Int32
 from collections import deque
 import numpy as np
 import math
@@ -50,7 +50,7 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         self.heading_adc_subscription
 
         self.cv_subscription = self.create_subscription(
-            Float32,
+            Int32,
             'neon_orange_detected',
             self.cv_listener_callback,
             10)
