@@ -55,7 +55,7 @@ class BallastADC(Node):
         heading_angle = (heading * 180 / self.pi)
         my_float_msg = Float32()
         my_float_msg.data = heading_angle
-        self.ballast_adc_publisher.publish(my_float_msg)
+        self.heading_adc_publisher.publish(my_float_msg)
 
     def read_raw_data(self, addr):
         # Read raw 16-bit value
