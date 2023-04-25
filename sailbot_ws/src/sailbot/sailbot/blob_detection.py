@@ -13,7 +13,7 @@ class NeonOrangeDetector(Node):
         self.orange_upper = (20, 255, 255)
 
         # Set the minimum area requirement for an object to be considered
-        self.min_area = 7500
+        self.min_area = 5000
 
         # Open the default camera
         self.cap = cv2.VideoCapture("/dev/video0")
