@@ -61,6 +61,7 @@ class NeonOrangeDetector(Node):
 def main(args=None):
     rclpy.init(args=args)
     neon_orange_detector = NeonOrangeDetector()
+    neon_orange_detector.get_logger().error("poo")
     rclpy.spin(neon_orange_detector)
     neon_orange_detector.destroy_node()
     rclpy.shutdown()
