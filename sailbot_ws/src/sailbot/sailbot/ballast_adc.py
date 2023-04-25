@@ -52,7 +52,7 @@ class BallastADC(Node):
             heading = heading + 2 * self.pi
 
         # convert into angle
-        heading_angle = heading * 180 / self.pi
+        heading_angle = (heading * 180 / self.pi)
         my_float_msg = Float32()
         my_float_msg.data = heading_angle
         self.ballast_adc_publisher.publish(my_float_msg)
