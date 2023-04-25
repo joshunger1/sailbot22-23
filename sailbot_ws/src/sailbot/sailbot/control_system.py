@@ -49,6 +49,13 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
             10)
         self.heading_adc_subscription
 
+        self.cv_subscription = self.create_subscription(
+            Float32,
+            'object_detected',
+            self.cv_listener_callback,
+            10)
+        self.cv_subscription
+
         # Create publisher to pwm_control
         self.pwm_control_publisher_ = self.create_publisher(String, 'pwm_control', 10)
 
@@ -65,6 +72,7 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         self.trim_tab_status = {}
         self.ballast_adc_value = 0.5
         self.heading_adc_value = 0
+        self.cv = 0
 
         # Create instance var for keeping queue of wind data
         self.lastWinds = []
@@ -320,6 +328,10 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
     def heading_adc_listener_callback(self, msg):
         self.heading_adc_value = msg.data
         self.get_logger().error('Received heading: "%s"' % msg.data)
+
+    def cv_listener_callback(self, msg):
+        self.cv_value = msg.data
+        self.get_logger().error('Received cv: "%s"' % msg.data)
 
     def trim_tab_telemetry_listener_callback(self, msg):
         self.get_logger().info('Received msg: "%s"' % msg.data)
