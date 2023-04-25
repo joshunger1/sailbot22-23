@@ -437,7 +437,7 @@ def main(args=None):
             control_system.get_logger().error("Currently in AUTONOMOUS")
 
             if control_system.cv == 1:
-                rudder_json = {"channel": "8", "angle": 84}
+                rudder_json = {"channel": "8", "angle": 106}
                 control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
 
             # code to control ballast
