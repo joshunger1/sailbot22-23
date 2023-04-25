@@ -45,10 +45,12 @@ class NeonOrangeDetector(Node):
                 x, y, w, h = cv2.boundingRect(largest_contour)
                 cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
                 self.publisher_.publish(Int32(data=1))
+                self.get_logger().error("found a buoy")
                 return
 
         # No object detected
         self.publisher_.publish(Int32(data=0))
+        self.get_logger().error("did not find a buoy")
 
     def __del__(self):
         # Release the camera and close the window
