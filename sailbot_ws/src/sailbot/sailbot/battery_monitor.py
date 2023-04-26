@@ -9,7 +9,7 @@ class BatteryMonitor(Node):
     def __init__(self):
         super().__init__('battery_monitor')
         self.publisher_ = self.create_publisher(Int64, 'battery_status', 10)
-        timer_period = 300  # 5 min
+        timer_period = 3  # 5 min
         self.timer = self.create_timer(timer_period, self.timer_callback)
         # Pin Definitions Need 5 board pins next to one another
         self.bat_p1 = 26  # 14V pin
