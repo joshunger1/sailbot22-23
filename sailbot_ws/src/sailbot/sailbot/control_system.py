@@ -304,7 +304,7 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         self.get_logger().error("you shouldn't be seeing this")
         return np.array(1, 1)
 
-    def unit_circle_to_heading_gps(self,x, y):
+    def unit_circle_to_heading_gps(self, x, y):
         """Convert unit circle (x, y) coordinates to heading angle in degrees."""
         angle = -math.degrees(math.atan2(y, x)) + 90
         return angle + 360 if angle < 0 else angle
@@ -400,7 +400,6 @@ def main(args=None):
         elif float(control_system.serial_rc["state2"]) > 600:  # in RC
             control_system.get_logger().error("Currently in RC")
 
-
             if float(control_system.serial_rc["state1"]) < 400:
                 # Manual
                 manual_angle = int((float(control_system.serial_rc["manual"]) / 2000) * 100) + 65
@@ -458,7 +457,8 @@ def main(args=None):
                     control_system.ballast_alg_active()
 
                 # code to Control the  Trim Tab
-                if "apparentWind" in control_system.airmar_data and "direction" in control_system.airmar_data["apparentWind"]:
+                if "apparentWind" in control_system.airmar_data and "direction" in control_system.airmar_data[
+                    "apparentWind"]:
                     try:
                         control_system.find_trim_tab_state(control_system.airmar_data["apparentWind"]["direction"])
                     except Exception as e:
@@ -469,9 +469,10 @@ def main(args=None):
                 # code to control the rudders (aka nav alg stuff)
 
                 if "Latitude" in control_system.airmar_data and "Longitude" in control_system.airmar_data:
-                    control_system.boat = np.array([float(control_system.airmar_data["Latitude"]), float(control_system.airmar_data["Longitude"])])
-                # if True:
-                #     control_system.boat = np.array([42.273752, -71.805981])
+                    control_system.boat = np.array(
+                        [float(control_system.airmar_data["Latitude"]), float(control_system.airmar_data["Longitude"])])
+                    # if True:
+                    #     control_system.boat = np.array([42.273752, -71.805981])
 
                     if "apparentWind" in control_system.airmar_data and "direction" in control_system.airmar_data[
                         "apparentWind"]:
@@ -498,34 +499,29 @@ def main(args=None):
                         control_system.get_logger().error("final desired heading: " + str(final_desired_heading))
                         control_system.get_logger().error("current heading: " + str(control_system.heading_adc_value))
 
-
                         # check if we are currently offset from the desired heading
-                        # if final_desired_heading - 5 > float(control_system.airmar_data["currentHeading"]):
-                        heading_difference = control_system.heading_adc_value - final_desired_heading
-                        heading_sign = np.sign(heading_difference)
+                        heading_difference = math.atan2(
+                            math.sin(math.radians(final_desired_heading - control_system.heading_adc_value)),
+                            math.cos(math.radians(final_desired_heading - control_system.heading_adc_value)))
+                        heading_difference = math.degrees(heading_difference)
 
                         if abs(heading_difference) < 10:
-                            rudder_json = {"channel": "8", "angle":69}
+                            rudder_json = {"channel": "8", "angle": 69}
                             control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
 
-                        elif heading_difference >= (180*heading_sign):
+                        elif heading_difference > 0:
                             rudder_json = {"channel": "8", "angle": 94}
                             control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
 
                         # elif final_desired_heading + 5 < float(control_system.airmar_data["currentHeading"]):
-                        elif heading_difference < (180*heading_sign):
+                        else:
                             rudder_json = {"channel": "8", "angle": 45}
                             control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
 
-                        else:
-                            rudder_json = {"channel": "8", "angle": 69}
-                            control_system.pwm_control_publisher_.publish(control_system.make_json_string(rudder_json))
                     else:
                         control_system.get_logger().error("No Wind Data")
                 else:
                     control_system.get_logger().error("No GPS Data")
-
-
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
