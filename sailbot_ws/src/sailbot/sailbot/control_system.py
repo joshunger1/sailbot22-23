@@ -99,7 +99,7 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
 
         # need to feed new values
         # test for
-        self.goal = np.array([4227.4869, 7180.5275])  # goal position
+        self.goal = np.array([4227.43991, 7180.57987])  # goal position
 
         # information stored on the boat's current heading
         self.onAB = False  # whether the boat is currently trying to sail a course on either side of the no-go zone
