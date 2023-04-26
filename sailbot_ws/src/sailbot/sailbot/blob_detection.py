@@ -10,7 +10,7 @@ class NeonOrangeDetector(Node):
 
         # Define the lower and upper bounds of the neon orange color in HSV format
         self.orange_lower = (5, 90, 80)
-        self.orange_upper = (20, 255, 255)
+        self.orange_upper = (20, 254, 253)
 
         # Set the minimum area requirement for an object to be considered
         self.min_area = 1500
