@@ -103,9 +103,16 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         # self.goal = np.array([4227.43991, 7180.57987])  # goal position
         self.accuracyCounter = 0
         self.goals_queue = deque([
-            np.array([4227.43991, 7180.57987]),  # initial goal position
-            np.array([1.0, 2.0]),  # additional goal positions
-            np.array([3.0, 4.0]),
+            np.array([4284.5627, -7097.7018]),  # initial goal position
+            np.array([4284.5618, -7097.6987]),  # additional goal positions
+            np.array([4284.5141, -7097.6801]),
+            np.array([4284.5144, -7097.6596]),
+            np.array([4284.5810, -7097.6211]),
+            np.array([4284.5923, -7097.6386]),
+            np.array([4284.5547, -7097.6768]),
+            np.array([4284.5618, -7097.6987]),
+            np.array([4284.5627, -7097.7018]),
+            np.array([4284.5677, -7097.7100]),
             # add more goal positions as needed
         ])
         self.goal = self.goals_queue.popleft()  # get the first goal position
@@ -509,10 +516,10 @@ def main(args=None):
                     
                     distance = control_system.distance_to_goal()
                
-                    if distance <= 0.01 and control_system.accuracyCounter < 4: # ~10m is the placeholder threshold distance, in units of meters
+                    if distance <= 0.01 and control_system.accuracyCounter < 7: # ~10m is the placeholder threshold distance, in units of meters
                         if control_system.goals_queue:
                             control_system.goal = control_system.goals_queue.popleft()
-                            control_system.accuracyCounter = control_system.accuracyCounter + 1
+                            control_system.accuracyCounter += 1 # increment until we've passed 7 waypoints
                     elif distance <= 0.005: # much tighter for crossing the gate
                         if control_system.goals_queue:
                             control_system.goal = control_system.goals_queue.popleft()
