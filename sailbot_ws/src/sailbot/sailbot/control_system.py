@@ -5,6 +5,7 @@ from std_msgs.msg import String, Float32, Int8, Int16, Int32
 from collections import deque
 import numpy as np
 import math
+from collections import deque
 
 
 class ControlSystem(Node):  # Gathers data from some nodes and distributes it to others
@@ -97,9 +98,16 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         self.wind = np.array([1, 0])  # wind in x and y velocity (m/s)
         self.windDir = self.wind / np.linalg.norm(self.wind)  # normalize the wind vector
 
-        # need to feed new values
-        # test for
-        self.goal = np.array([4227.43991, 7180.57987])  # goal position
+        # # need to feed new values
+        # # test for
+        # self.goal = np.array([4227.43991, 7180.57987])  # goal position
+        self.goals_queue = deque([
+            np.array([4227.43991, 7180.57987]),  # initial goal position
+            np.array([1.0, 2.0]),  # additional goal positions
+            np.array([3.0, 4.0]),
+            # add more goal positions as needed
+        ])
+        self.goal = self.goals_queue.popleft()  # get the first goal position
 
         # information stored on the boat's current heading
         self.onAB = False  # whether the boat is currently trying to sail a course on either side of the no-go zone
@@ -386,6 +394,32 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         return (sum(s[n // 2 - 1:n // 2 + 1]) / 2.0, s[n // 2])[n % 2] if n else None
 
 
+    def distance_to_goal(self):
+        # Convert latitude and longitude from degrees to radians
+
+        tempLat1 = self.goal[0]
+        tempLon1 = self.goal[1]
+        tempLat2 = self.boat[0]
+        tempLon2 = self.boat[1]
+    
+        lat1 = math.radians(tempLat1/100.0)
+        lon1 = math.radians(tempLon1/100.0)
+        lat2 = math.radians(tempLat2/100.0)
+        lon2 = math.radians(tempLon2/100.0)
+
+        # Haversine formula
+        dlon = lon2 - lon1
+        dlat = lat2 - lat1
+        a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+        # Radius of the Earth in meters
+        radius = 6371 * 1000  # 6371 km
+
+        # Calculate the distance
+        distance = radius * c
+        return distance
+
 def main(args=None):
     rclpy.init(args=args)
 
@@ -471,8 +505,12 @@ def main(args=None):
                 if "Latitude" in control_system.airmar_data and "Longitude" in control_system.airmar_data:
                     control_system.boat = np.array(
                         [float(control_system.airmar_data["Latitude"]), float(control_system.airmar_data["Longitude"])])
-                    # if True:
-                    #     control_system.boat = np.array([42.273752, -71.805981])
+                    
+                    distance = control_system.distance_to_goal()
+               
+                    if distance <= 5: # 5m is the placeholder threshold distance, in units of meters
+                        if control_system.goals_queue:
+                            control_system.goal = control_system.goals_queue.popleft()
 
                     if "apparentWind" in control_system.airmar_data and "direction" in control_system.airmar_data[
                         "apparentWind"]:
