@@ -5,7 +5,7 @@ from std_msgs.msg import String, Float32, Int8, Int16, Int32
 from collections import deque
 import numpy as np
 import math
-from collections import deque
+from collections import deque # TODO: replace the queue for waypoints with a more traditional python queue
 
 
 class ControlSystem(Node):  # Gathers data from some nodes and distributes it to others
@@ -101,6 +101,7 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
         # # need to feed new values
         # # test for
         # self.goal = np.array([4227.43991, 7180.57987])  # goal position
+        self.accuracyCounter = 0
         self.goals_queue = deque([
             np.array([4227.43991, 7180.57987]),  # initial goal position
             np.array([1.0, 2.0]),  # additional goal positions
@@ -397,15 +398,15 @@ class ControlSystem(Node):  # Gathers data from some nodes and distributes it to
     def distance_to_goal(self):
         # Convert latitude and longitude from degrees to radians
 
-        tempLat1 = self.goal[0]
-        tempLon1 = self.goal[1]
-        tempLat2 = self.boat[0]
-        tempLon2 = self.boat[1]
+        # tempLat1 = self.goal[0]
+        # tempLon1 = self.goal[1]
+        # tempLat2 = self.boat[0]
+        # tempLon2 = self.boat[1]
     
-        lat1 = math.radians(tempLat1/100.0)
-        lon1 = math.radians(tempLon1/100.0)
-        lat2 = math.radians(tempLat2/100.0)
-        lon2 = math.radians(tempLon2/100.0)
+        lat1 = math.radians(self.goal[0]/100.0)
+        lon1 = math.radians(self.goal[1]/100.0)
+        lat2 = math.radians(self.boat[0]/100.0)
+        lon2 = math.radians(self.boat[1]/100.0)
 
         # Haversine formula
         dlon = lon2 - lon1
@@ -508,7 +509,11 @@ def main(args=None):
                     
                     distance = control_system.distance_to_goal()
                
-                    if distance <= 5: # 5m is the placeholder threshold distance, in units of meters
+                    if distance <= 0.01 and control_system.accuracyCounter < 4: # ~10m is the placeholder threshold distance, in units of meters
+                        if control_system.goals_queue:
+                            control_system.goal = control_system.goals_queue.popleft()
+                            control_system.accuracyCounter = control_system.accuracyCounter + 1
+                    elif distance <= 0.005: # much tighter for crossing the gate
                         if control_system.goals_queue:
                             control_system.goal = control_system.goals_queue.popleft()
 
